@@ -27,7 +27,9 @@ export class FollowService {
   public async getFollowTargetsByAddress(walletAddress: string) {
     this.resetFollowTargetList();
 
-    const url = `https://mainnet-idx.algonode.cloud/v2/accounts/${walletAddress}/transactions?note-prefix=d2Vjb29wLXYxOmZvbGxvdzo%3D`;
+    console.log('wallet address', walletAddress);
+
+    const url = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=d2Vjb29wLXYxOmZvbGxvdzo%3D`;
 
     try {
       const { data } = await axios.get(url);
@@ -43,8 +45,6 @@ export class FollowService {
 
       // If you need it as an array
       const followTargetsList = Array.from(followTargetsSet);
-
-      console.log('followTargetsList', followTargetsList);
 
       return followTargetsList;
     } catch (error) {

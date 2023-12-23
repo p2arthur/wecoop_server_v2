@@ -13,8 +13,6 @@ export class RepliesService {
     repliesList: any,
     likesList: any,
   ): PostInterface[] {
-    console.log('repliesList', repliesList);
-
     const mappedReplies = repliesList.transactions
       .filter((reply) => atob(reply.note).split(':')[3] === postTransactionId)
       .map((filteredReply) => {

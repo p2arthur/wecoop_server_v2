@@ -11,7 +11,7 @@ import { LikesService } from 'src/likes/likes.service';
 import { RepliesService } from 'src/replies/replies.service';
 
 @Injectable()
-export class PostsService {
+export class FeedService {
   //----------------------------------------------------------------------------
   //Setting the prefix of this Class - Posts
   private notePrefix: string = NotePrefix.WeCoopPost;
@@ -42,7 +42,7 @@ export class PostsService {
 
   //Method to get all posts sent to the platform
   //----------------------------------------------------------------------------
-  public async getAllPosts() {
+  public async getAllPosts(walletAddres?: string) {
     this.resetPostsList();
     //TODO - Move likes logic to its own service - This is testing
     const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
@@ -85,11 +85,12 @@ export class PostsService {
   }
   //----------------------------------------------------------------------------
 
-  //Method to get all posts using a given address
+  //Method to get all posts created by a given address
   //----------------------------------------------------------------------------
   public async getAllPostsByAddress(walletAddres: string) {
-    const url = this.setGetPostsUrl(walletAddres);
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(
+      'https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=d2Vjb29wLXYxOmZvbGxvdzo%3D',
+    );
     const { transactions } = data;
 
     for (let transaction of transactions) {
@@ -98,8 +99,19 @@ export class PostsService {
       this.postsList.push(post);
     }
 
+    console.log(this.postsList);
+
     return this.postsList;
   }
 
-  public async getUserFeed(address) {}
+  public async getFeedByWalletAddress(
+    userFollowTargets: string[],
+    postsList: PostInterface[],
+  ) {
+    const filteredPosts = postsList.filter((post) =>
+      userFollowTargets.includes(post.creator_address),
+    );
+
+    return filteredPosts;
+  }
 }

@@ -4,7 +4,6 @@ import { AssetId } from 'src/enums/AssetId';
 import { FollowService } from 'src/follow/follow.service';
 import { UserInterface } from 'src/interfaces/UserInterface';
 import { UserNfdInterface } from 'src/interfaces/UserNfd';
-// import { minidenticon } from 'minidenticons';
 
 @Injectable()
 export class UserService {
@@ -80,6 +79,8 @@ export class UserService {
   public async getUserFollowTargets(walletAddres: string) {
     const data =
       await this.followServices.getFollowTargetsByAddress(walletAddres);
+
+    console.log('getUserFollowTargets', data);
 
     return data;
   }
