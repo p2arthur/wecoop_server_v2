@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { AssetId } from 'src/enums/AssetId';
+import { FollowService } from 'src/follow/follow.service';
 import { UserInterface } from 'src/interfaces/UserInterface';
 import { UserNfdInterface } from 'src/interfaces/UserNfd';
 // import { minidenticon } from 'minidenticons';
@@ -12,7 +13,11 @@ export class UserService {
     avatar: '',
     nfd: { name: '', avatar: '' },
     balance: 0,
+    followTargets: [],
   };
+  //----------------------------------------------------------------------------
+  constructor(private followServices: FollowService) {}
+
   //----------------------------------------------------------------------------
   private resetUserData() {
     this.userData = {
@@ -20,12 +25,20 @@ export class UserService {
       avatar: '',
       nfd: { name: '', avatar: '' },
       balance: 0,
+      followTargets: [],
     };
   }
 
   //----------------------------------------------------------------------------
-  private setUserData({ address, avatar, nfd, balance }: UserInterface) {
-    const user = { address, avatar, nfd, balance };
+  private setUserData({
+    address,
+    avatar,
+    nfd,
+    balance,
+    followTargets,
+  }: UserInterface) {
+    this.resetUserData();
+    const user = { address, avatar, nfd, balance, followTargets };
 
     this.userData = user;
 
@@ -48,12 +61,14 @@ export class UserService {
   public async getUserData(walletAddres: string) {
     const userBalance = await this.getUserBalance(walletAddres);
     const nfd = await this.getUserNfd(walletAddres);
+    const followTargets = await this.getUserFollowTargets(walletAddres);
 
     const userData: UserInterface = {
       address: walletAddres,
       avatar: nfd.avatar || null,
       nfd: nfd,
       balance: userBalance,
+      followTargets,
     };
 
     this.setUserData(userData);
@@ -61,6 +76,13 @@ export class UserService {
     return this.userData;
   }
   //----------------------------------------------------------------------------
+
+  public async getUserFollowTargets(walletAddres: string) {
+    const data =
+      await this.followServices.getFollowTargetsByAddress(walletAddres);
+
+    return data;
+  }
 
   //----------------------------------------------------------------------------
   private async getUserNfd(walletAddress: string) {
@@ -72,13 +94,10 @@ export class UserService {
       );
 
       const userNfdData = data[walletAddress];
-      console.log('nfd data', userNfdData);
       const nfdName = userNfdData.name;
-      console.log('nfd name', userNfdData);
 
       const nfdAvatar = userNfdData?.properties?.userDefined?.avatar;
 
-      console.log('nfd avatar', nfdAvatar);
       userNfd = { name: nfdName, avatar: nfdAvatar || null };
 
       return userNfd;

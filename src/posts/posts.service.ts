@@ -4,7 +4,7 @@ import * as base64 from 'base-64';
 import { WalletAddress } from 'src/enums/WalletAddress';
 import { NotePrefix } from 'src/enums/NotePrefix';
 import { AssetId } from 'src/enums/AssetId';
-import { Fee } from 'src/enums/Fee';
+import { Fees } from 'src/enums/Fee';
 import { PostInterface } from 'src/interfaces/PostInterface';
 import { PostService } from 'src/post/post.service';
 import { LikesService } from 'src/likes/likes.service';
@@ -31,8 +31,8 @@ export class PostsService {
     return `https://mainnet-idx.algonode.cloud/v2/accounts/${address}/transactions?note-prefix=${base64.encode(
       this.notePrefix,
     )}&tx-type=axfer&asset-id=${AssetId.coopCoin}&currency-greater-than=${
-      Fee.postFee - 1
-    }&currency-less-than=${Fee.postFee + 1}`;
+      Fees.PostFee - 1
+    }&currency-less-than=${Fees.PostFee + 1}`;
   }
 
   //Method to reset postsList propertie of this class
@@ -100,4 +100,6 @@ export class PostsService {
 
     return this.postsList;
   }
+
+  public async getUserFeed(address) {}
 }

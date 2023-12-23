@@ -5,4 +5,5 @@ export interface UserInterface {
   avatar?: string | undefined;
   nfd?: UserNfdInterface;
   balance?: number;
+  followTargets: string[];
 }
