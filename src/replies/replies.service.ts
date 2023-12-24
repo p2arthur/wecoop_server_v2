@@ -20,7 +20,7 @@ export class RepliesService {
         const creatorAddress = filteredReply.sender;
         const transactionId = filteredReply.id;
         const timestamp = filteredReply['round-time'];
-        const country = atob(filteredReply.note).split(':')[2];
+        const country = atob(filteredReply.note).split(':')[3];
         const replyLikes = this.likesService.filterLikesByPostTransactionId(
           transactionId,
           likesList,

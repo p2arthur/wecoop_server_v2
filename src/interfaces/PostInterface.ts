@@ -6,4 +6,5 @@ export interface PostInterface {
   country: string | null;
   likes: number | [];
   replies: PostInterface[] | [];
+  status: 'accepted' | null;
 }

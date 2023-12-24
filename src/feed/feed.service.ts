@@ -89,14 +89,17 @@ export class FeedService {
   //----------------------------------------------------------------------------
   public async getAllPostsByAddress(walletAddres: string) {
     const { data } = await axios.get(
-      'https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=d2Vjb29wLXYxOmZvbGxvdzo%3D',
+      'https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=d2Vjb29wLXYxOnBvc3Q=',
     );
     const { transactions } = data;
 
     for (let transaction of transactions) {
-      const post = await this.postServices.setPost(transaction);
+      if (transaction.sender == walletAddres) {
+        console.log(true);
+        const post = await this.postServices.setPost(transaction);
 
-      this.postsList.push(post);
+        this.postsList.push(post);
+      }
     }
 
     console.log(this.postsList);
