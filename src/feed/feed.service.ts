@@ -87,23 +87,18 @@ export class FeedService {
 
   //Method to get all posts created by a given address
   //----------------------------------------------------------------------------
-  public async getAllPostsByAddress(walletAddres: string) {
+  public async getAllPostsByAddress(walletAddress: string) {
     const { data } = await axios.get(
-      'https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=d2Vjb29wLXYxOnBvc3Q=',
+      `https://mainnet-idx.algonode.cloud/v2/accounts/${walletAddress}/transactions?note-prefix=d2Vjb29wLXYxOnBvc3Q=`,
     );
     const { transactions } = data;
 
     for (let transaction of transactions) {
-      if (transaction.sender == walletAddres) {
-        console.log(true);
-        const post = await this.postServices.setPost(transaction);
-
-        this.postsList.push(post);
-      }
+      const post = await this.postServices.setPost(transaction);
+      this.postsList.push(post);
     }
 
-    console.log(this.postsList);
-
+    console.log('this.postlist', this.postsList);
     return this.postsList;
   }
 
