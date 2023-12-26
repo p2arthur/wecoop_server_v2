@@ -95,7 +95,6 @@ export class FeedService {
     allPosts.forEach((post) => {
       if (post.creator_address === walletAddress) {
         uniquePostList.push(post);
-        console.log(true);
       }
     });
     this.postsList = uniquePostList;

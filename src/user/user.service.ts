@@ -80,8 +80,6 @@ export class UserService {
     const data =
       await this.followServices.getFollowTargetsByAddress(walletAddres);
 
-    console.log('getUserFollowTargets', data);
-
     return data;
   }
 

@@ -30,7 +30,6 @@ export class FeedController {
       followTargets,
       postsList,
     );
-    console.log('These are filtered posts', feed);
     return feed;
   }
 }

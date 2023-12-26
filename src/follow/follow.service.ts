@@ -31,8 +31,6 @@ export class FollowService {
   public async getFollowTargetsByAddress(walletAddress: string) {
     this.resetFollowTargetList();
 
-    console.log('wallet address', walletAddress);
-
     const followsUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/${walletAddress}/transactions?note-prefix=${btoa(
       NotePrefix.WeCoopFollow,
     )}`;
@@ -54,7 +52,7 @@ export class FollowService {
             const target = decodedNote.split(':')[2];
             return {
               unfollowTarget: target,
-              timestamp: unfollowTransaction['round-time'],
+              timestamp: unfollowTransaction['confirmed-round'],
             };
           }),
         )),
@@ -65,7 +63,10 @@ export class FollowService {
         followData.transactions.map((transaction) => {
           const decodedNote = atob(transaction.note);
           const target = decodedNote.split(':')[2];
-          return { followTarget: target, timestamp: transaction['round-time'] };
+          return {
+            followTarget: target,
+            timestamp: transaction['confirmed-round'],
+          };
         }),
       );
       const followTargetsList: FollowTarget[] = Array.from(
