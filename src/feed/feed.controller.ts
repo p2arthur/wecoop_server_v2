@@ -18,6 +18,7 @@ export class FeedController {
   @Get('/:walletAddress')
   async getAllPostsByAddress(@Param('walletAddress') walletAddress: string) {
     const response = await this.feedService.getAllPostsByAddress(walletAddress);
+
     return response;
   }
   @Get('/by/:walletAddress')
