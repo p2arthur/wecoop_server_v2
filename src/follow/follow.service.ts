@@ -6,6 +6,10 @@ import { Fees } from 'src/enums/Fee';
 import { NotePrefix } from 'src/enums/NotePrefix';
 import { WalletAddress } from 'src/enums/WalletAddress';
 
+interface FollowTarget {
+  followTarget: string;
+  timestamp: number;
+}
 @Injectable()
 export class FollowService {
   public followTargetList: string[] = [];
@@ -29,24 +33,55 @@ export class FollowService {
 
     console.log('wallet address', walletAddress);
 
-    const url = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=d2Vjb29wLXYxOmZvbGxvdzo%3D`;
+    const followsUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/${walletAddress}/transactions?note-prefix=${btoa(
+      NotePrefix.WeCoopFollow,
+    )}`;
+
+    const unfollowUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/${walletAddress}/transactions?note-prefix=${btoa(
+      NotePrefix.WeCoopUnfollow,
+    )}`;
 
     try {
-      const { data } = await axios.get(url);
+      const { data: followData } = await axios.get(followsUrl);
+      const { data: unfollowData } = await axios.get(unfollowUrl);
 
-      const transactions = data.transactions;
-      const followTargetsSet = new Set<string>();
+      let unfollowTargets;
 
-      transactions.forEach((transaction) => {
-        const decodedNote = atob(transaction.note);
-        const target = decodedNote.split(':')[2];
-        followTargetsSet.add(target);
-      });
+      if (unfollowData) {
+        (unfollowTargets = new Set(
+          unfollowData.transactions.map((unfollowTransaction) => {
+            const decodedNote = atob(unfollowTransaction.note);
+            const target = decodedNote.split(':')[2];
+            return {
+              unfollowTarget: target,
+              timestamp: unfollowTransaction['round-time'],
+            };
+          }),
+        )),
+          console.log('unfollowTargets', unfollowTargets);
+      }
 
-      // If you need it as an array
-      const followTargetsList = Array.from(followTargetsSet);
+      const followTargetsSet = new Set(
+        followData.transactions.map((transaction) => {
+          const decodedNote = atob(transaction.note);
+          const target = decodedNote.split(':')[2];
+          return { followTarget: target, timestamp: transaction['round-time'] };
+        }),
+      );
+      const followTargetsList: FollowTarget[] = Array.from(
+        followTargetsSet,
+      ) as FollowTarget[];
+      const followTargets = [];
+      for (let follow of followTargetsList) {
+        for (let unfollow of unfollowTargets) {
+          if (follow.timestamp > unfollow.timestamp) {
+            followTargets.push(follow.followTarget);
+            console.log('follow targets', followTargets);
+          }
+        }
+      }
 
-      return followTargetsList;
+      return Array.from(new Set(followTargets));
     } catch (error) {
       throw new Error('Error getting follow targets...');
     }
