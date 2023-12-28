@@ -55,7 +55,7 @@ export class FeedService {
     const { data: allLikes } = await axios.get(likesUrl);
     const { data: allReplies } = await axios.get(repliesUrl);
 
-    const url = this.setGetPostsUrl(WalletAddress.WeCoopMainAddres);
+    const url = this.setGetPostsUrl(WalletAddress.WeCoopMainAddress);
     const { data } = await axios.get(url);
     const { transactions } = data;
 
