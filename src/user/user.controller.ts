@@ -7,8 +7,8 @@ export class UserController {
   constructor(private userServices: UserService) {}
 
   @Get('/:walletAddress')
-  getUserData(@Param('walletAddress') walletAddress: string) {
-    const data = this.userServices.getUserData(walletAddress);
-    return data;
+  async getUserData(@Param('walletAddress') walletAddress: string) {
+    const data = await this.userServices.getUserData(walletAddress);
+    return { data };
   }
 }

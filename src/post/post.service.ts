@@ -13,6 +13,7 @@ export class PostService {
     country: null,
     likes: [],
     replies: [],
+    status: null,
   };
 
   public async setPost(transaction: any) {
@@ -33,6 +34,7 @@ export class PostService {
       country: postCountry,
       likes: 0,
       replies: [],
+      status: 'accepted',
     };
 
     return this.post;
