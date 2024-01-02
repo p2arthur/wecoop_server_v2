@@ -30,6 +30,8 @@ export class FeedController {
       followTargets,
       postsList,
     );
-    return feed;
+    return feed.sort((a, b) => {
+      return b.timestamp - a.timestamp;
+    });
   }
 }
