@@ -8,5 +8,9 @@ export class PostController {
   @Get('/:postTransactionId')
   getPostByTransactionId(
     @Param('postTransactionId') postTransactionId: string,
-  ) {}
+  ) {
+    const data = this.postServices.getPostByTransactionId(postTransactionId);
+
+    return data;
+  }
 }
