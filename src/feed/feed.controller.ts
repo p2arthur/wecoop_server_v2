@@ -13,6 +13,7 @@ export class FeedController {
   async getAllPosts() {
     const response = await this.feedService.getAllPosts();
     return response;
+    return 'fodase';
   }
 
   @Get('/:walletAddress')

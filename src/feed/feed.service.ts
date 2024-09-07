@@ -59,8 +59,32 @@ export class FeedService {
     const { data } = await axios.get(url);
     const { transactions } = data;
 
+    console.log('transactions', transactions);
+
+    let post: any = {};
+
     for (let transaction of transactions) {
-      const post: PostInterface = await this.postServices.setPost(transaction);
+      // const post: PostInterface = await this.postServices.setPost(transaction);
+
+      const encodedNote = transaction.note;
+      const decodedNote = atob(encodedNote);
+      const postData = decodedNote.split(':');
+      const postCountry = postData[2];
+      const postText = postData[3];
+      const creatorAddress = transaction.sender;
+      const transactionId = transaction.id;
+      const timestamp = transaction['round-time'];
+
+      post = {
+        text: postText,
+        creator_address: creatorAddress,
+        transaction_id: transactionId,
+        timestamp,
+        country: postCountry,
+        likes: 0,
+        replies: [],
+        status: 'accepted',
+      };
 
       const postLikes = this.likesServices.filterLikesByPostTransactionId(
         transaction.id,
@@ -79,6 +103,8 @@ export class FeedService {
       });
 
       this.postsList.push(post);
+
+      console.log('pushing post', post);
     }
 
     return this.postsList;
