@@ -1,9 +1,17 @@
+<<<<<<< HEAD
 import { Injectable, NotFoundException } from '@nestjs/common';
+=======
+import { Injectable } from '@nestjs/common';
+>>>>>>> 2ab473b27547db96aa4fd668e96e5e735749e291
 import axios from 'axios';
 import base64 from 'base-64';
 import { AssetId } from 'src/enums/AssetId';
 import { Fees } from 'src/enums/Fee';
 import { NotePrefix } from 'src/enums/NotePrefix';
+<<<<<<< HEAD
+=======
+import { WalletAddress } from 'src/enums/WalletAddress';
+>>>>>>> 2ab473b27547db96aa4fd668e96e5e735749e291
 import { PostInterface } from 'src/interfaces/PostInterface';
 import { LikesService } from 'src/likes/likes.service';
 import { RepliesService } from 'src/replies/replies.service';
@@ -11,8 +19,13 @@ import { RepliesService } from 'src/replies/replies.service';
 @Injectable()
 export class PostService {
   constructor(
+<<<<<<< HEAD
     private likesServices: LikesService,
     private repliesServices: RepliesService,
+=======
+    private repliesServices: RepliesService,
+    private likesServices: LikesService,
+>>>>>>> 2ab473b27547db96aa4fd668e96e5e735749e291
   ) {}
 
   private notePrefix: string = NotePrefix.WeCoopPost;
@@ -56,6 +69,32 @@ export class PostService {
       replies: [],
       status: 'accepted',
     };
+
+    const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
+      NotePrefix.WeCoopLike,
+    )}&tx-type=axfer`;
+    const repliesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
+      NotePrefix.WeCoopReply,
+    )}&tx-type=axfer`;
+
+    const { data: allLikes } = await axios.get(likesUrl);
+    const { data: allReplies } = await axios.get(repliesUrl);
+
+    const postLikes = this.likesServices.filterLikesByPostTransactionId(
+      transaction.id,
+      allLikes,
+    );
+
+    const postReplies = this.repliesServices.filterRepliesByPostTransactionId(
+      transaction.id,
+      allReplies,
+      allLikes,
+    );
+
+    Object.assign(this.post, {
+      likes: postLikes,
+      replies: postReplies,
+    });
 
     return this.post;
   }
