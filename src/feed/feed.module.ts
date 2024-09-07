@@ -6,10 +6,8 @@ import { RepliesService } from 'src/replies/replies.service';
 import { UserService } from 'src/user/user.service';
 import { FeedController } from './feed.controller';
 import { FollowService } from 'src/follow/follow.service';
-import { PostModule } from 'src/post/post.module';
 
 @Module({
-  imports: [PostModule],
   controllers: [FeedController],
   providers: [
     FeedService,
