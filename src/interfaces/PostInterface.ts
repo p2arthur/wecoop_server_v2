@@ -7,4 +7,5 @@ export interface PostInterface {
   likes: number | [];
   replies: PostInterface[] | [];
   status: 'accepted' | null;
+  assetId: number;
 }
