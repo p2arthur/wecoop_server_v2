@@ -63,6 +63,8 @@ export class FeedService {
 
     let post: any = {};
 
+    console.log('all transactions', transactions);
+
     for (let transaction of transactions) {
       // const post: PostInterface = await this.postServices.setPost(transaction);
 
@@ -74,6 +76,7 @@ export class FeedService {
       const creatorAddress = transaction.sender;
       const transactionId = transaction.id;
       const timestamp = transaction['round-time'];
+      const assetId = transaction['asset-transfer-transaction']['asset-id'];
 
       post = {
         text: postText,
@@ -84,6 +87,7 @@ export class FeedService {
         likes: 0,
         replies: [],
         status: 'accepted',
+        assetId,
       };
 
       const postLikes = this.likesServices.filterLikesByPostTransactionId(
@@ -103,8 +107,6 @@ export class FeedService {
       });
 
       this.postsList.push(post);
-
-      console.log('pushing post', post);
     }
 
     return this.postsList;

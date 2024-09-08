@@ -26,6 +26,7 @@ export class PostService {
     likes: [],
     replies: [],
     status: null,
+    assetId: 0,
   };
 
   private setGetPostsUrl(address: string) {
@@ -45,6 +46,7 @@ export class PostService {
     const creatorAddress = transaction.sender;
     const transactionId = transaction.id;
     const timestamp = transaction['round-time'];
+    const assetId = transaction['asset-id'];
 
     this.post = {
       text: postText,
@@ -55,6 +57,7 @@ export class PostService {
       likes: 0,
       replies: [],
       status: 'accepted',
+      assetId,
     };
 
     const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
