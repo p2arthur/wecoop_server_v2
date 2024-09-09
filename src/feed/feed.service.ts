@@ -26,13 +26,19 @@ export class FeedService {
     private repliesServices: RepliesService,
   ) {}
 
+  // //Method to reset set indexer url based on a given address
+  // private setGetPostsUrl(address: string, assetId: number) {
+  //   return `https://mainnet-idx.algonode.cloud/v2/accounts/${address}/transactions?note-prefix=${base64.encode(
+  //     this.notePrefix,
+  //   )}&tx-type=axfer&asset-id=${assetId}&currency-greater-than=${
+  //     Fees.PostFee - 1
+  //   }&currency-less-than=${Fees.PostFee + 1}`;
+  // }
   //Method to reset set indexer url based on a given address
-  private setGetPostsUrl(address: string) {
+  private setGetPostsUrl(address: string, assetId: number) {
     return `https://mainnet-idx.algonode.cloud/v2/accounts/${address}/transactions?note-prefix=${base64.encode(
       this.notePrefix,
-    )}&tx-type=axfer&asset-id=${AssetId.coopCoin}&currency-greater-than=${
-      Fees.PostFee - 1
-    }&currency-less-than=${Fees.PostFee + 1}`;
+    )}&tx-type=axfer&asset-id=${assetId}`;
   }
 
   //Method to reset postsList propertie of this class
@@ -55,17 +61,37 @@ export class FeedService {
     const { data: allLikes } = await axios.get(likesUrl);
     const { data: allReplies } = await axios.get(repliesUrl);
 
-    const url = this.setGetPostsUrl(WalletAddress.WeCoopMainAddress);
-    const { data } = await axios.get(url);
-    const { transactions } = data;
+    const coopPostsUrl = this.setGetPostsUrl(
+      WalletAddress.WeCoopMainAddress,
+      AssetId.coopCoin,
+    );
+    const xUsdPostsUrl = this.setGetPostsUrl(
+      WalletAddress.WeCoopMainAddress,
+      AssetId.xUSD,
+    );
 
-    console.log('transactions', transactions);
+    const { data: coopPostsData } = await axios.get(coopPostsUrl);
+    const { transactions: coopPostsTransactions } = coopPostsData;
+
+    const { data: xUsdPostsData } = await axios.get(xUsdPostsUrl);
+    const { transactions: xUsdPostTransactions } = xUsdPostsData;
+
+    console.log('xusd link', xUsdPostsUrl);
+
+    const allPostTransactions = [
+      ...coopPostsTransactions,
+      ...xUsdPostTransactions,
+    ];
+
+    const sortedPostTransactions = allPostTransactions.sort(
+      (a, b) => b['confirmed-round'] - a['confirmed-round'],
+    );
+
+    console.log('transactions', xUsdPostTransactions);
 
     let post: any = {};
 
-    console.log('all transactions', transactions);
-
-    for (let transaction of transactions) {
+    for (let transaction of sortedPostTransactions) {
       // const post: PostInterface = await this.postServices.setPost(transaction);
 
       const encodedNote = transaction.note;
