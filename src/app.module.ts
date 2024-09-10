@@ -5,6 +5,7 @@ import { LikesModule } from './likes/likes.module';
 import { RepliesModule } from './replies/replies.module';
 import { FollowModule } from './follow/follow.module';
 import { FeedModule } from './feed/feed.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { FeedModule } from './feed/feed.module';
     LikesModule,
     RepliesModule,
     FollowModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}
