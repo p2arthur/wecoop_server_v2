@@ -69,6 +69,14 @@ export class FeedService {
       WalletAddress.WeCoopMainAddress,
       AssetId.xUSD,
     );
+    const jawsPostsUrl = this.setGetPostsUrl(
+      WalletAddress.WeCoopMainAddress,
+      AssetId.jaws,
+    );
+    const orangePostsUrl = this.setGetPostsUrl(
+      WalletAddress.WeCoopMainAddress,
+      AssetId.orange,
+    );
 
     const { data: coopPostsData } = await axios.get(coopPostsUrl);
     const { transactions: coopPostsTransactions } = coopPostsData;
@@ -76,11 +84,17 @@ export class FeedService {
     const { data: xUsdPostsData } = await axios.get(xUsdPostsUrl);
     const { transactions: xUsdPostTransactions } = xUsdPostsData;
 
-    console.log('xusd link', xUsdPostsUrl);
+    const { data: jawsPostsData } = await axios.get(jawsPostsUrl);
+    const { transactions: jawsPostTransactions } = jawsPostsData;
+
+    const { data: orangePostsData } = await axios.get(orangePostsUrl);
+    const { transactions: orangePostTransactions } = orangePostsData;
 
     const allPostTransactions = [
       ...coopPostsTransactions,
       ...xUsdPostTransactions,
+      ...jawsPostTransactions,
+      ...orangePostTransactions,
     ];
 
     const sortedPostTransactions = allPostTransactions.sort(
