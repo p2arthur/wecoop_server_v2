@@ -90,6 +90,8 @@ export class PostService {
   }
 
   public async getPostByTransactionId(transactionId: string) {
+    console.log('postid my bro:123123!@#%', transactionId);
+
     const transactionUrl = `https://mainnet-idx.algonode.cloud/v2/transactions/${transactionId}`;
 
     //Get likes and comments to appent to the found post
@@ -135,5 +137,13 @@ export class PostService {
       console.error('Error getting post from transaction id', error);
       throw new Error('Error getting post from transaction id');
     }
+  }
+
+  public async getPostCreatorByTransactionId(transactionId: string) {
+    const transactionUrl = `https://mainnet-idx.algonode.cloud/v2/transactions/${transactionId}`;
+    const { data } = await axios.get(transactionUrl);
+    const { transaction } = data;
+
+    return transaction.sender;
   }
 }
