@@ -113,7 +113,7 @@ export class UserService {
         `https://api.nf.domains/nfd/lookup?address=${walletAddress}&view=thumbnail&allowUnverified=true`,
       );
 
-      const userNfdData = data[walletAddress];
+      const userNfdData = data?.[walletAddress];
       const nfdName = userNfdData.name;
 
       const nfdAvatar = userNfdData?.properties?.userDefined?.avatar;
@@ -122,7 +122,7 @@ export class UserService {
 
       return userNfd;
     } catch (error) {
-      console.log('error');
+      console.error('errorss getting user nfd');
       return userNfd;
     }
   }

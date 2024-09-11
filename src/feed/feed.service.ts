@@ -101,8 +101,6 @@ export class FeedService {
       (a, b) => b['confirmed-round'] - a['confirmed-round'],
     );
 
-    console.log('transactions', xUsdPostTransactions);
-
     let post: any = {};
 
     for (let transaction of sortedPostTransactions) {
