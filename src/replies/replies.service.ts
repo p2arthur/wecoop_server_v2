@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import axios from 'axios';
+import { NotePrefix } from 'src/enums/NotePrefix';
 import { PostInterface } from 'src/interfaces/PostInterface';
 import { LikesService } from 'src/likes/likes.service';
 
@@ -13,6 +15,8 @@ export class RepliesService {
     repliesList: any,
     likesList: any,
   ): PostInterface[] {
+    console.log('replies list', repliesList);
+
     const mappedReplies = repliesList.transactions
       .filter((reply) => atob(reply.note).split(':')[3] === postTransactionId)
       .map((filteredReply) => {
@@ -21,6 +25,7 @@ export class RepliesService {
         const transactionId = filteredReply.id;
         const timestamp = filteredReply['round-time'];
         const country = atob(filteredReply.note).split(':')[2];
+        const assetId = filteredReply['asset-transfer-transaction']['asset-id'];
         const replyLikes = this.likesService.filterLikesByPostTransactionId(
           transactionId,
           likesList,
@@ -34,10 +39,20 @@ export class RepliesService {
           country,
           likes: replyLikes,
           replies: [],
+          assetId,
         };
       });
 
     this.replies = mappedReplies;
     return this.replies;
+  }
+
+  public async getAllReplies() {
+    const repliesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
+      NotePrefix.WeCoopReply,
+    )}&tx-type=axfer`;
+    const { data: allReplies } = await axios.get(repliesUrl);
+
+    return allReplies;
   }
 }
