@@ -90,8 +90,6 @@ export class PostService {
   }
 
   public async getPostByTransactionId(transactionId: string) {
-    console.log('postid my bro:123123!@#%', transactionId);
-
     const transactionUrl = `https://mainnet-idx.algonode.cloud/v2/transactions/${transactionId}`;
 
     //Get likes and comments to appent to the found post
