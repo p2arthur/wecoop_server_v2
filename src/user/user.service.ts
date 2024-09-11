@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { usableAssetsList } from 'src/data/usableAssetList';
 import { AssetId } from 'src/enums/AssetId';
 import { FollowService } from 'src/follow/follow.service';
 import { UserInterface } from 'src/interfaces/UserInterface';
@@ -11,7 +12,7 @@ export class UserService {
     address: '',
     avatar: '',
     nfd: { name: '', avatar: '' },
-    balance: 0,
+    balance: {},
     followTargets: [],
   };
   //----------------------------------------------------------------------------
@@ -23,7 +24,7 @@ export class UserService {
       address: '',
       avatar: '',
       nfd: { name: '', avatar: '' },
-      balance: 0,
+      balance: {},
       followTargets: [],
     };
   }
@@ -46,10 +47,30 @@ export class UserService {
 
   private async getUserBalance(walletAddres: string) {
     try {
-      const { data } = await axios.get(
-        `https://mainnet-idx.algonode.cloud/v2/accounts/${walletAddres}/assets?asset-id=${AssetId.coopCoin}&include-all=false`,
+      const userBalances = {};
+
+      Promise.all(
+        usableAssetsList.map(async (asset) => {
+          const key = asset.assetId;
+
+          const { data } = await axios.get(
+            `https://mainnet-idx.algonode.cloud/v2/accounts/${walletAddres}/assets?asset-id=${asset.assetId}&include-all=false`,
+          );
+
+          if (!data.assets[0]) {
+            userBalances[key] = 0;
+            return;
+          }
+
+          const balance = parseFloat(
+            (data.assets[0].amount / 10 ** 6).toFixed(2),
+          );
+
+          userBalances[key] = balance;
+        }),
       );
-      return parseFloat((data.assets[0].amount / 10 ** 6).toFixed(2));
+
+      return userBalances;
     } catch (error) {
       return 0;
     }
