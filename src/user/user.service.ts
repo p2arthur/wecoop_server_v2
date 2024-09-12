@@ -45,46 +45,55 @@ export class UserService {
     return this.userData;
   }
 
-  private async getUserBalance(walletAddres: string) {
+  //----------------------------------------------------------------------------
+  private async getUserBalance(walletAddress: string) {
     try {
-      const userBalances = {};
+      const userBalances: { [key: string]: number } = {};
 
-      Promise.all(
+      // Fetch balances for all assets concurrently
+      await Promise.all(
         usableAssetsList.map(async (asset) => {
           const key = asset.assetId;
 
-          const { data } = await axios.get(
-            `https://mainnet-idx.algonode.cloud/v2/accounts/${walletAddres}/assets?asset-id=${asset.assetId}&include-all=false`,
-          );
+          try {
+            const { data } = await axios.get(
+              `https://mainnet-idx.algonode.cloud/v2/accounts/${walletAddress}/assets?asset-id=${asset.assetId}&include-all=false`,
+            );
 
-          if (!data.assets[0]) {
+            if (data.assets.length === 0 || !data.assets[0]) {
+              userBalances[key] = 0;
+            } else {
+              const balance = parseFloat(
+                (data.assets[0].amount / 10 ** 6).toFixed(2),
+              );
+              userBalances[key] = balance;
+            }
+          } catch (error) {
+            console.error(
+              `Error fetching balance for asset ${asset.assetId}:`,
+              error,
+            );
             userBalances[key] = 0;
-            return;
           }
-
-          const balance = parseFloat(
-            (data.assets[0].amount / 10 ** 6).toFixed(2),
-          );
-
-          userBalances[key] = balance;
         }),
       );
 
       return userBalances;
     } catch (error) {
-      return 0;
+      console.error('Error fetching user balances:', error);
+      return {};
     }
   }
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  public async getUserData(walletAddres: string) {
-    const userBalance = await this.getUserBalance(walletAddres);
-    const nfd = await this.getUserNfd(walletAddres);
-    const followTargets = await this.getUserFollowTargets(walletAddres);
+  public async getUserData(walletAddress: string) {
+    const userBalance = await this.getUserBalance(walletAddress);
+    const nfd = await this.getUserNfd(walletAddress);
+    const followTargets = await this.getUserFollowTargets(walletAddress);
 
     const userData: UserInterface = {
-      address: walletAddres,
+      address: walletAddress,
       avatar: nfd.avatar || null,
       nfd: nfd,
       balance: userBalance,
@@ -97,10 +106,9 @@ export class UserService {
   }
   //----------------------------------------------------------------------------
 
-  public async getUserFollowTargets(walletAddres: string) {
+  public async getUserFollowTargets(walletAddress: string) {
     const data =
-      await this.followServices.getFollowTargetsByAddress(walletAddres);
-
+      await this.followServices.getFollowTargetsByAddress(walletAddress);
     return data;
   }
 
@@ -113,17 +121,16 @@ export class UserService {
         `https://api.nf.domains/nfd/lookup?address=${walletAddress}&view=thumbnail&allowUnverified=true`,
       );
 
-      const userNfdData = data?.[walletAddress];
-      const nfdName = userNfdData.name;
+      const userNfdData = data[walletAddress];
+      const nfdName = userNfdData?.name || null;
+      const nfdAvatar = userNfdData?.properties?.userDefined?.avatar || null;
 
-      const nfdAvatar = userNfdData?.properties?.userDefined?.avatar;
-
-      userNfd = { name: nfdName, avatar: nfdAvatar || null };
+      userNfd = { name: nfdName, avatar: nfdAvatar };
 
       return userNfd;
     } catch (error) {
-      console.error('errorss getting user nfd');
-      return userNfd;
+      console.error('Error fetching NFD data:', error);
+      return userNfd; // Return default NFD if error
     }
   }
 }
