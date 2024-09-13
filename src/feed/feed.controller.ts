@@ -35,4 +35,11 @@ export class FeedController {
       return b.timestamp - a.timestamp;
     });
   }
+
+  @Get('/asset/:assetId')
+  async getFeedByAssetId(@Param('assetId') assetId: number) {
+    const postsList = this.feedService.getFeedByAssetId(assetId);
+
+    return postsList;
+  }
 }
