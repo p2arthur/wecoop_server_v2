@@ -77,6 +77,10 @@ export class FeedService {
       WalletAddress.WeCoopMainAddress,
       AssetId.orange,
     );
+    const akitaPostsUrl = this.setGetPostsUrl(
+      WalletAddress.WeCoopMainAddress,
+      AssetId.akita,
+    );
 
     const { data: coopPostsData } = await axios.get(coopPostsUrl);
     const { transactions: coopPostsTransactions } = coopPostsData;
@@ -90,11 +94,15 @@ export class FeedService {
     const { data: orangePostsData } = await axios.get(orangePostsUrl);
     const { transactions: orangePostTransactions } = orangePostsData;
 
+    const { data: akitaPostsData } = await axios.get(akitaPostsUrl);
+    const { transactions: akitaPostTransactions } = akitaPostsData;
+
     const allPostTransactions = [
       ...coopPostsTransactions,
       ...xUsdPostTransactions,
       ...jawsPostTransactions,
       ...orangePostTransactions,
+      ...akitaPostTransactions,
     ];
 
     const sortedPostTransactions = allPostTransactions.sort(
