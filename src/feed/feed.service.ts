@@ -69,8 +69,15 @@ export class FeedService {
 
     // Process transactions into posts
     for (const transaction of sortedPostTransactions) {
-      const post = await this.createPost(transaction, allLikes, allReplies);
-      if (post) this.postsList.push(post);
+      // Verifique se já existe um post com o mesmo transaction_id
+      const postExists = this.postsList.some(
+        (post) => post.transaction_id === transaction.id,
+      );
+
+      if (!postExists) {
+        const post = await this.createPost(transaction, allLikes, allReplies);
+        if (post) this.postsList.push(post);
+      }
     }
 
     return this.postsList;
