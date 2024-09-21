@@ -49,7 +49,21 @@ export class RepliesService {
     const repliesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
       NotePrefix.WeCoopReply,
     )}&tx-type=axfer`;
-    const { data: allReplies } = await axios.get(repliesUrl);
+    const { data } = await axios.get(repliesUrl);
+
+    const allReplies = [];
+
+    const { transactions: replyTransactions } = data;
+
+    replyTransactions.forEach((transaction) => {
+      const encodedNote = transaction.note;
+      const decodedNote = atob(encodedNote);
+
+      const postId = decodedNote.split(':')[3];
+      const sender = transaction.sender;
+
+      allReplies.push({ postId, sender });
+    });
 
     return allReplies;
   }

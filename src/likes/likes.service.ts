@@ -23,8 +23,9 @@ export class LikesService {
       const decodedNote = atob(encodedNote);
 
       const postId = decodedNote.split(':')[3];
+      const sender = transaction.sender;
 
-      allLikes.push({ postId: postId });
+      allLikes.push({ postId, sender });
     });
 
     return allLikes;
