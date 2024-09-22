@@ -4,8 +4,9 @@ export interface PostInterface {
   transaction_id: string | null;
   timestamp: number | null;
   country: string | null;
-  likes: number | [];
+  likes: [{creator_address: string}];
   replies: PostInterface[] | [];
   status: 'accepted' | null;
   assetId: number;
+  isTopPost?: boolean;
 }

@@ -8,6 +8,7 @@ import { PostService } from 'src/post/post.service';
 import { LikesService } from 'src/likes/likes.service';
 import { RepliesService } from 'src/replies/replies.service';
 import { usableAssetsList } from 'src/data/usableAssetList';
+import { isNumber } from '@nestjs/common/utils/shared.utils';
 
 @Injectable()
 export class FeedService {
@@ -79,6 +80,17 @@ export class FeedService {
         if (post) this.postsList.push(post);
       }
     }
+    // Encontrar o post com mais likes
+    let topPost = this.postsList.reduce((top, current) => {
+      return current.likes.length > (top?.likes.length || 0) ? current : top;
+    }, null);
+
+
+    // Inserir a variável isTopPost: true no post com mais likes
+    this.postsList = this.postsList.map(post => ({
+      ...post,
+      isTopPost: post.transaction_id === topPost?.transaction_id ? true : false
+    }));
 
     return this.postsList;
   }
