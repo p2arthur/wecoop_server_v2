@@ -38,6 +38,7 @@ export class RepliesService {
           likes: replyLikes,
           replies: [],
           assetId,
+          status: 'accepted',
         };
       });
 
