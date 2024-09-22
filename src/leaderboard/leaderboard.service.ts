@@ -3,6 +3,11 @@ import { FeedService } from '../feed/feed.service';
 import { LikesService } from '../likes/likes.service';
 import { RepliesService } from '../replies/replies.service';
 
+export interface GetTopCreatorsProps {
+  topCreators: { address: string; count: number }[]
+  totalTransactions: number
+}
+
 @Injectable()
 export class LeaderboardService {
   constructor(
@@ -11,7 +16,7 @@ export class LeaderboardService {
     private repliesService: RepliesService,
   ) {}
 
-  public async getTopCreators(): Promise<{ address: string; count: number }[]> {
+  public async getTopCreators(): Promise<GetTopCreatorsProps> {
     const [posts, likesData, repliesData] = await Promise.all([
       this.feedService.getAllPosts(),
       this.likesService.getAllLikes(),
@@ -40,6 +45,11 @@ export class LeaderboardService {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    return sortedCreators;
+    const totalInteractions = posts.length + likesData.length + repliesData.length;
+
+    return  {
+      topCreators: sortedCreators,
+      totalTransactions: totalInteractions,
+    };
   }
 }

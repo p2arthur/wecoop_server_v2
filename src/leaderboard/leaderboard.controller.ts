@@ -8,6 +8,7 @@ export class LeaderboardController {
   @Get('top-creators')
   public async getTopCreators() {
     const topCreators = await this.leaderboardService.getTopCreators();
+    console.log(topCreators, 'top')
     return topCreators;
   }
 }
