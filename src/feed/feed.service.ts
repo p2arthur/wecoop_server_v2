@@ -54,7 +54,7 @@ export class FeedService {
           const assetPostsUrl = this.setGetPostsUrl(
             WalletAddress.WeCoopMainAddress,
             usableAsset.assetId,
-            60,
+            30,
           );
           const { data } = await axios.get(assetPostsUrl);
           return data.transactions;
