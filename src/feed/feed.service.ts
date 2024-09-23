@@ -21,14 +21,69 @@ export class FeedService {
     private repliesServices: RepliesService,
   ) {}
 
-  private setGetPostsUrl(address: string, assetId: number): string {
+  private setGetPostsUrl(address: string, assetId: number, limit?: number): string {
     return `https://mainnet-idx.algonode.cloud/v2/accounts/${address}/transactions?note-prefix=${base64.encode(
       this.notePrefix,
-    )}&tx-type=axfer&asset-id=${assetId}`;
+    )}&tx-type=axfer&asset-id=${assetId}${isNumber(limit) ? `&limit=${limit}` : ''}`;
   }
 
   private resetPostsList(): void {
     this.postsList = [];
+  }
+
+  public async getLastPosts(): Promise<PostInterface[]> {
+
+    const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
+      NotePrefix.WeCoopLike,
+    )}&tx-type=axfer`;
+
+    const repliesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
+      NotePrefix.WeCoopReply,
+    )}&tx-type=axfer`;
+
+    // Fetch likes and replies
+    const [allLikes, allReplies] = await Promise.all([
+      axios.get(likesUrl).then((res) => res.data),
+      axios.get(repliesUrl).then((res) => res.data),
+    ]);
+
+    // Loop through the usableAssetsList and get transactions for each asset
+    const allPostTransactions = (
+      await Promise.all(
+        usableAssetsList.map(async (usableAsset) => {
+          const assetPostsUrl = this.setGetPostsUrl(
+            WalletAddress.WeCoopMainAddress,
+            usableAsset.assetId,
+            60,
+          );
+          const { data } = await axios.get(assetPostsUrl);
+          return data.transactions;
+        }),
+      )
+    ).flat();
+
+    // Sort transactions
+    const sortedPostTransactions = allPostTransactions.sort(
+      (a, b) => b['confirmed-round'] - a['confirmed-round'],
+    );
+
+    // Process transactions into posts
+    for (const transaction of sortedPostTransactions) {
+      // Verifique se já existe um post com o mesmo transaction_id
+      const postExists = this.postsList.some(
+        (post) => post.transaction_id === transaction.id,
+      );
+
+      if (!postExists) {
+        const post = await this.createPost(transaction, allLikes, allReplies);
+        if (post) this.postsList.push(post);
+      }
+    }
+
+    console.log(this.postsList, 'postList')
+   
+
+    return this.postsList;
   }
 
   // Refactor to loop over usableAssetsList
