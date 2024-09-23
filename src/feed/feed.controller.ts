@@ -16,6 +16,13 @@ export class FeedController {
     return 'fodase';
   }
 
+  @Get('/global-last-posts')
+  async getLastPosts() {
+    const response = await this.feedService.getLastPosts();
+    return response;
+  }
+
+
   @Get('/:walletAddress')
   async getAllPostsByAddress(@Param('walletAddress') walletAddress: string) {
     const response = await this.feedService.getAllPostsByAddress(walletAddress);
