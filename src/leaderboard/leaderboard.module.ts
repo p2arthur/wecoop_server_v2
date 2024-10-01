@@ -8,6 +8,7 @@ import { FeedService } from 'src/feed/feed.service';
 import { LikesService } from 'src/likes/likes.service';
 import { RepliesService } from 'src/replies/replies.service';
 import { PostService } from 'src/post/post.service';
+import { PollsService } from 'src/polls/polls.service';
 
 @Module({
   imports: [FeedModule, LikesModule, RepliesModule],
@@ -17,6 +18,7 @@ import { PostService } from 'src/post/post.service';
     LikesService,
     RepliesService,
     PostService,
+    PollsService,
   ],
   controllers: [LeaderboardController],
 })

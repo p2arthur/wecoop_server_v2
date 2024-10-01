@@ -5,6 +5,7 @@ import { FeedService } from 'src/feed/feed.service';
 import { PostService } from 'src/post/post.service';
 import { LikesService } from 'src/likes/likes.service';
 import { RepliesService } from 'src/replies/replies.service';
+import { PollsService } from 'src/polls/polls.service';
 
 @Module({
   controllers: [AnalyticsController],
@@ -14,6 +15,7 @@ import { RepliesService } from 'src/replies/replies.service';
     PostService,
     LikesService,
     RepliesService,
+    PollsService,
   ],
 })
 export class AnalyticsModule {}

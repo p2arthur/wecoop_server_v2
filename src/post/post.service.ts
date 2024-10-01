@@ -27,6 +27,7 @@ export class PostService {
     replies: [],
     status: null,
     assetId: 0,
+    type: 'post',
   };
 
   private setGetPostsUrl(address: string) {
@@ -58,6 +59,7 @@ export class PostService {
       replies: [],
       status: 'accepted',
       assetId,
+      type: 'post',
     };
 
     const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(

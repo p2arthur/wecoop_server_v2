@@ -9,6 +9,7 @@ import { LikesService } from 'src/likes/likes.service';
 import { RepliesService } from 'src/replies/replies.service';
 import { usableAssetsList } from 'src/data/usableAssetList';
 import { isNumber } from '@nestjs/common/utils/shared.utils';
+import { PollsService } from 'src/polls/polls.service';
 
 @Injectable()
 export class FeedService {
@@ -19,6 +20,7 @@ export class FeedService {
     private postServices: PostService,
     private likesServices: LikesService,
     private repliesServices: RepliesService,
+    private pollsService: PollsService,
   ) {}
 
   private setGetPostsUrl(address: string, assetId: number): string {
@@ -85,12 +87,19 @@ export class FeedService {
       return current.likes.length > (top?.likes.length || 0) ? current : top;
     }, null);
 
-
     // Inserir a variável isTopPost: true no post com mais likes
-    this.postsList = this.postsList.map(post => ({
+    this.postsList = this.postsList.map((post) => ({
       ...post,
-      isTopPost: post.transaction_id === topPost?.transaction_id ? true : false
+      isTopPost: post.transaction_id === topPost?.transaction_id ? true : false,
     }));
+
+    const allPolls = await this.pollsService.getAllPolls();
+
+    const allContents = [...allPolls, ...this.postsList].sort((a, b) => {
+      return b.timestamp - a.timestamp;
+    });
+
+    this.postsList = allContents;
 
     return this.postsList;
   }
@@ -130,6 +139,7 @@ export class FeedService {
         replies: postReplies,
         status: 'accepted',
         assetId,
+        type: 'post',
       };
     } catch (error) {
       console.error('Error creating post:', error);

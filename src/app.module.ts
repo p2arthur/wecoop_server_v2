@@ -7,9 +7,12 @@ import { FollowModule } from './follow/follow.module';
 import { FeedModule } from './feed/feed.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { PollsModule } from './polls/polls.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     UserModule,
     PostModule,
     LikesModule,
@@ -18,6 +21,7 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
     FeedModule,
     AnalyticsModule,
     LeaderboardModule,
+    PollsModule,
   ],
 })
 export class AppModule {}
