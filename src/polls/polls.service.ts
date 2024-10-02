@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import algosdk, { Algodv2, decodeUint64, encodeAddress } from 'algosdk';
+import { PollInterface } from 'src/interfaces/PollInterface';
 import { PostInterface } from 'src/interfaces/PostInterface';
 import { getRoundTimestamp } from 'src/utils/getRoundTimestamp';
 
@@ -13,7 +14,7 @@ export class PollsService {
     process.env.ALGOD_PORT,
   );
 
-  async getAllPolls(): Promise<PostInterface[]> {
+  async getAllPolls(): Promise<PollInterface[]> {
     const wecoopDaoAppId = 723107049;
 
     const boxesResponse = await this.algodClient
@@ -22,7 +23,7 @@ export class PollsService {
 
     console.log('boxes response', boxesResponse);
 
-    const allPolls: PostInterface[] = [];
+    const allPolls: PollInterface[] = [];
 
     const decoder = new TextDecoder('utf-8');
 
@@ -96,7 +97,6 @@ export class PollsService {
           this.algodClient,
           timestampNumber,
         );
-
         console.log('trueTimestamp', trueTimestamp);
 
         // Construct the poll object
@@ -111,14 +111,17 @@ export class PollsService {
           question: question,
         };
 
-        const poll: PostInterface = {
+        const poll: PollInterface = {
           text: question,
+          pollId: Number(pollId),
           timestamp: Number(trueTimestamp),
           creator_address: creatorAddress,
           status: 'accepted',
           assetId: Number(selectedAsset),
           depositedAmount: Number(deposited),
-          type: 'poll',
+          country: 'BR',
+          totalVotes: Number(totalVotes),
+          yesVotes: Number(yesVotes),
         };
 
         allPolls.push(poll);

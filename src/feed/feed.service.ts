@@ -10,11 +10,13 @@ import { RepliesService } from 'src/replies/replies.service';
 import { usableAssetsList } from 'src/data/usableAssetList';
 import { isNumber } from '@nestjs/common/utils/shared.utils';
 import { PollsService } from 'src/polls/polls.service';
+import { PollInterface } from 'src/interfaces/PollInterface';
 
 @Injectable()
 export class FeedService {
   private notePrefix: string = NotePrefix.WeCoopPost;
   private postsList: PostInterface[] = [];
+  private pollsList: PollInterface[] = [];
 
   constructor(
     private postServices: PostService,
@@ -34,7 +36,7 @@ export class FeedService {
   }
 
   // Refactor to loop over usableAssetsList
-  public async getAllPosts(walletAddres?: string): Promise<PostInterface[]> {
+  public async getAllPosts(walletAddres?: string): Promise<any[]> {
     this.resetPostsList();
 
     const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
@@ -95,13 +97,11 @@ export class FeedService {
 
     const allPolls = await this.pollsService.getAllPolls();
 
-    const allContents = [...allPolls, ...this.postsList].sort((a, b) => {
-      return b.timestamp - a.timestamp;
-    });
+    this.pollsList = allPolls.sort((a, b) => b.timestamp - a.timestamp);
 
-    this.postsList = allContents;
-
-    return this.postsList;
+    return [...this.postsList, ...this.pollsList].sort(
+      (b, a) => a.timestamp - b.timestamp,
+    );
   }
 
   private async createPost(
@@ -139,7 +139,7 @@ export class FeedService {
         replies: postReplies,
         status: 'accepted',
         assetId,
-        type: 'post',
+        isPersonalized: false,
       };
     } catch (error) {
       console.error('Error creating post:', error);

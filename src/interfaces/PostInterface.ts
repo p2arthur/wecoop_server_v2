@@ -1,14 +1,13 @@
 export interface PostInterface {
   text: string;
   creator_address: string;
-  transaction_id?: string | null;
+  transaction_id: string;
   timestamp: number | null;
-  country?: string | null;
-  likes?: [{ creator_address: string }];
-  replies?: PostInterface[] | [];
-  status: 'accepted' | null;
+  country: string;
+  nfd?: string;
+  likes: PostInterface[];
+  replies: PostInterface[];
+  status: 'accepted' | 'loading' | 'rejected' | null;
   assetId: number;
-  isTopPost?: boolean;
-  depositedAmount?: number;
-  type: 'post' | 'poll';
+  isPersonalized: boolean;
 }
