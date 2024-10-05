@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import algosdk, { Algodv2, decodeUint64, encodeAddress } from 'algosdk';
 import { PollInterface, VoterInterface } from 'src/interfaces/PollInterface';
-import { PostInterface } from 'src/interfaces/PostInterface';
 import { getRoundTimestamp } from 'src/utils/getRoundTimestamp';
 
 @Injectable()
@@ -41,8 +40,12 @@ export class PollsService {
         const prefix = decoder.decode(prefixBytes); // 'poll_'
         offset += 5;
 
-        // Decode the pollId (next 8 bytes as uint64 big-endian)
+        // Check for empty pollIdBytes before decoding
         const pollIdBytes = boxNameBytes.slice(offset, offset + 8);
+        if (pollIdBytes.length !== 8) {
+          console.error('Skipping empty or invalid pollIdBytes');
+          continue; // Skip to next box if pollIdBytes length is invalid
+        }
         const pollId = decodeUint64(pollIdBytes, 'bigint');
         offset += 8;
 
@@ -61,36 +64,64 @@ export class PollsService {
 
         // Decode the creator's address (32 bytes)
         const creatorAddressBytes = contentBytes.slice(offset, offset + 32);
+        if (creatorAddressBytes.length !== 32) {
+          console.error('Skipping invalid creatorAddressBytes');
+          continue;
+        }
         const creatorAddress = encodeAddress(creatorAddressBytes);
         offset += 32;
 
         // Decode selected_asset (8 bytes as uint64)
         const selectedAssetBytes = contentBytes.slice(offset, offset + 8);
+        if (selectedAssetBytes.length !== 8) {
+          console.error('Skipping invalid selectedAssetBytes');
+          continue;
+        }
         const selectedAsset = decodeUint64(selectedAssetBytes, 'bigint');
         offset += 8;
 
         // Decode totalVotes (8 bytes as uint64)
         const totalVotesBytes = contentBytes.slice(offset, offset + 8);
+        if (totalVotesBytes.length !== 8) {
+          console.error('Skipping invalid totalVotesBytes');
+          continue;
+        }
         const totalVotes = decodeUint64(totalVotesBytes, 'bigint');
         offset += 8;
 
         // Decode yesVotes (8 bytes as uint64)
         const yesVotesBytes = contentBytes.slice(offset, offset + 8);
+        if (yesVotesBytes.length !== 8) {
+          console.error('Skipping invalid yesVotesBytes');
+          continue;
+        }
         const yesVotes = decodeUint64(yesVotesBytes, 'bigint');
         offset += 8;
 
         // Decode deposited (8 bytes as uint64)
         const depositedBytes = contentBytes.slice(offset, offset + 8);
+        if (depositedBytes.length !== 8) {
+          console.error('Skipping invalid depositedBytes');
+          continue;
+        }
         const deposited = decodeUint64(depositedBytes, 'bigint');
         offset += 8;
 
         // Decode the timestamp (8 bytes as uint64)
         const timestampBytes = contentBytes.slice(offset, offset + 8);
+        if (timestampBytes.length !== 8) {
+          console.error('Skipping invalid timestampBytes');
+          continue;
+        }
         const timestamp = decodeUint64(timestampBytes, 'bigint');
         offset += 8;
 
         // Decode expiry_timestamp (8 bytes as uint64)
         const expiryTimestampBytes = contentBytes.slice(offset, offset + 8);
+        if (expiryTimestampBytes.length !== 8) {
+          console.error('Skipping invalid expiryTimestampBytes');
+          continue;
+        }
         const expiryTimestamp = decodeUint64(expiryTimestampBytes, 'bigint');
         offset += 8;
 
@@ -168,9 +199,10 @@ export class PollsService {
 
         // Check if voterBytes length is 32 (Algorand address size)
         if (voterBytes.length !== 32) {
-          throw new Error(
-            `Invalid voter address length: ${voterBytes.length} bytes, expected 32 bytes`,
+          console.error(
+            `Skipping invalid voter address length: ${voterBytes.length}`,
           );
+          continue;
         }
 
         const voterAddress = encodeAddress(voterBytes); // Decode as an Algorand address
