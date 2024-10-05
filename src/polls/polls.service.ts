@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import algosdk, { Algodv2, decodeUint64, encodeAddress } from 'algosdk';
-import { PollInterface } from 'src/interfaces/PollInterface';
+import { PollInterface, VoterInterface } from 'src/interfaces/PollInterface';
 import { PostInterface } from 'src/interfaces/PostInterface';
 import { getRoundTimestamp } from 'src/utils/getRoundTimestamp';
 
@@ -15,10 +15,10 @@ export class PollsService {
   );
 
   async getAllPolls(): Promise<PollInterface[]> {
-    const wecoopDaoAppId = 723107049;
+    const wecoopDaoAppId = process.env.WECOOP_POLL_APP_ID;
 
     const boxesResponse = await this.algodClient
-      .getApplicationBoxes(wecoopDaoAppId)
+      .getApplicationBoxes(Number(wecoopDaoAppId))
       .do();
 
     console.log('boxes response', boxesResponse);
@@ -27,6 +27,9 @@ export class PollsService {
 
     const decoder = new TextDecoder('utf-8');
 
+    // Retrieve all votes
+    const allPollsVotes = await this.getAllVotes();
+
     // Iterate through all boxes, retrieve their contents, and decode them
     for (const box of boxesResponse.boxes) {
       const boxNameBytes = box.name; // Uint8Array containing the box name
@@ -34,7 +37,7 @@ export class PollsService {
 
       try {
         // Decode the box name (starts with 'poll_' prefix, followed by pollId as uint64)
-        const prefixBytes = boxNameBytes.slice(offset, offset + 5);
+        const prefixBytes = boxNameBytes.slice(offset, 5);
         const prefix = decoder.decode(prefixBytes); // 'poll_'
         offset += 5;
 
@@ -43,14 +46,17 @@ export class PollsService {
         const pollId = decodeUint64(pollIdBytes, 'bigint');
         offset += 8;
 
+        // Filter votes for this pollId
+        const pollVotes = allPollsVotes.filter(
+          (vote) => vote.pollId === Number(pollId),
+        );
+
         // Get the box content (Uint8Array)
         const boxContentResponse = await this.algodClient
-          .getApplicationBoxByName(wecoopDaoAppId, boxNameBytes)
+          .getApplicationBoxByName(Number(wecoopDaoAppId), boxNameBytes)
           .do();
 
-        console.log('box content response', boxContentResponse);
-
-        const contentBytes = boxContentResponse.value; // Uint8Array of the box content
+        const contentBytes = boxContentResponse.value;
         offset = 0; // Reset offset for contentBytes
 
         // Decode the creator's address (32 bytes)
@@ -58,7 +64,7 @@ export class PollsService {
         const creatorAddress = encodeAddress(creatorAddressBytes);
         offset += 32;
 
-        // Decode the selected_asset (8 bytes as uint64)
+        // Decode selected_asset (8 bytes as uint64)
         const selectedAssetBytes = contentBytes.slice(offset, offset + 8);
         const selectedAsset = decodeUint64(selectedAssetBytes, 'bigint');
         offset += 8;
@@ -83,34 +89,31 @@ export class PollsService {
         const timestamp = decodeUint64(timestampBytes, 'bigint');
         offset += 8;
 
-        // At this point, make sure the offset is aligned correctly for the question
-        console.log('Offset after timestamp:', offset);
+        // Decode expiry_timestamp (8 bytes as uint64)
+        const expiryTimestampBytes = contentBytes.slice(offset, offset + 8);
+        const expiryTimestamp = decodeUint64(expiryTimestampBytes, 'bigint');
+        offset += 8;
 
-        // Decode the question (remaining bytes)
-        const questionBytes = contentBytes.slice(offset + 4); // SKIP FIRST BYTE (assuming it’s a metadata byte)
-        console.log('Raw question bytes:', questionBytes); // Log the raw bytes for the question
+        // **FIX** Extract country from the special characters and position (find the position of the 'CA')
+        const specialBytes = contentBytes.slice(offset, offset + 8); // Find the part that has the 'CA'
+        const specialString = decoder.decode(specialBytes);
+
+        // Use a regex or manual method to extract 'CA' from the special characters
+        const countryMatch = specialString.match(/[A-Z]{2}/); // Find two uppercase letters
+        const country = countryMatch ? countryMatch[0] : ''; // Extract 'CA' or fallback to an empty string
+        offset += 10;
+
+        // **FIX** Decode the question (remaining bytes after country)
+        const questionBytes = contentBytes.slice(offset); // Decode remaining bytes for the question
         const question = decoder.decode(questionBytes).trim();
 
-        const timestampNumber = Number(timestamp);
-
+        // Get the true timestamp using a helper function
         const trueTimestamp = await getRoundTimestamp(
           this.algodClient,
-          timestampNumber,
+          Number(timestamp),
         );
-        console.log('trueTimestamp', trueTimestamp);
 
-        // Construct the poll object
-        const pollProperties = {
-          boxName: `${prefix}${pollId}`,
-          creatorAddress: creatorAddress,
-          selectedAsset: selectedAsset.toString(),
-          totalVotes: totalVotes.toString(),
-          yesVotes: yesVotes.toString(),
-          deposited: deposited.toString(),
-          timestamp: trueTimestamp,
-          question: question,
-        };
-
+        // Construct the poll object, including votes
         const poll: PollInterface = {
           text: question,
           pollId: Number(pollId),
@@ -119,9 +122,11 @@ export class PollsService {
           status: 'accepted',
           assetId: Number(selectedAsset),
           depositedAmount: Number(deposited),
-          country: 'BR',
           totalVotes: Number(totalVotes),
           yesVotes: Number(yesVotes),
+          expiry_timestamp: Number(expiryTimestamp), // Added expiry timestamp
+          country: country, // Added country
+          voters: pollVotes, // Append the filtered votes for this poll
         };
 
         allPolls.push(poll);
@@ -130,8 +135,69 @@ export class PollsService {
       }
     }
 
-    console.log('allPolls', allPolls);
-
     return allPolls;
+  }
+
+  async getAllVotes() {
+    const wecoopDaoAppId = process.env.WECOOP_POLL_APP_ID;
+
+    const boxesResponse = await this.algodClient
+      .getApplicationBoxes(Number(wecoopDaoAppId))
+      .do();
+
+    const allVotes: VoterInterface[] = [];
+
+    const decoder = new TextDecoder('utf-8');
+
+    // Iterate through all boxes, retrieve their contents, and decode them
+    for (const box of boxesResponse.boxes) {
+      const boxNameBytes = box.name; // Uint8Array containing the box name
+      let offset = 0;
+
+      try {
+        // Decode the box name (starts with 'poll_' prefix, followed by pollId)
+        const prefixBytes = boxNameBytes.slice(offset, 5); // Assuming 'poll_' is 5 bytes
+        const prefix = decoder.decode(prefixBytes); // 'poll_'
+
+        // Decode pollId (next 8 bytes as uint64 big-endian)
+        const pollIdBytes = boxNameBytes.slice(5, 13); // Poll ID starts after the 'poll_' prefix
+        const pollId = new DataView(pollIdBytes.buffer).getBigUint64(0, false); // Read as uint64
+
+        // Decode voter address (remaining 32 bytes)
+        const voterBytes = boxNameBytes.slice(13); // The voter address is expected to be the remaining bytes (32 bytes)
+
+        // Check if voterBytes length is 32 (Algorand address size)
+        if (voterBytes.length !== 32) {
+          throw new Error(
+            `Invalid voter address length: ${voterBytes.length} bytes, expected 32 bytes`,
+          );
+        }
+
+        const voterAddress = encodeAddress(voterBytes); // Decode as an Algorand address
+
+        console.log('Poll ID:', pollId, 'Voter Address:', voterAddress);
+
+        // Now retrieve and decode the box content (VoteInfo)
+        const voteInfoBytes = await this.algodClient
+          .getApplicationBoxByName(Number(wecoopDaoAppId), box.name)
+          .do();
+
+        const claimedBytes = voteInfoBytes.value.slice(0, 1); // First byte for claimed (0 or 1)
+        const claimed = claimedBytes[0] ? true : false; // Since it's a single byte, just use the first byte
+
+        // Store the vote info
+        allVotes.push({
+          pollId: Number(pollId),
+          voterAddress,
+          claimed,
+        });
+
+        console.log('allVotes', allVotes);
+      } catch (error) {
+        console.error('Error decoding vote:', error);
+      }
+    }
+
+    return allVotes;
   }
 }

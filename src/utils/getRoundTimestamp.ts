@@ -18,7 +18,7 @@ export async function getRoundTimestamp(
     } else {
       // Handle the case where the timestamp is invalid
       console.error('Invalid timestamp received from the blockchain');
-      console.log('Using fallback date: N/A');
+    
     }
   } catch (error) {
     console.error('Error fetching block timestamp:', error);

@@ -129,7 +129,7 @@ export class UserService {
 
       return userNfd;
     } catch (error) {
-      console.error('Error fetching NFD data:', error);
+      console.error('Error fetching NFD data:');
       return userNfd; // Return default NFD if error
     }
   }
