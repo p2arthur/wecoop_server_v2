@@ -13,7 +13,6 @@ export class FeedController {
   async getAllPosts() {
     const response = await this.feedService.getAllPosts();
     return response;
-    return 'fodase';
   }
 
   @Get('/:walletAddress')
@@ -41,5 +40,13 @@ export class FeedController {
     const postsList = this.feedService.getFeedByAssetId(assetId);
 
     return postsList;
+  }
+
+  @Get('/fodase/createFella')
+  async createNewPost() {
+    const result = await this.feedService.createNewPost();
+
+    console.log('create into db', result);
+    return result;
   }
 }

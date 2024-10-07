@@ -9,6 +9,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { PollsModule } from './polls/polls.module';
 import { ConfigModule } from '@nestjs/config';
+import { DataModule } from './infra/modules/data.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ConfigModule } from '@nestjs/config';
     AnalyticsModule,
     LeaderboardModule,
     PollsModule,
+    DataModule,
   ],
 })
 export class AppModule {}

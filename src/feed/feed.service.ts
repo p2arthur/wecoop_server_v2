@@ -11,6 +11,7 @@ import { usableAssetsList } from 'src/data/usableAssetList';
 import { isNumber } from '@nestjs/common/utils/shared.utils';
 import { PollsService } from 'src/polls/polls.service';
 import { PollInterface } from 'src/interfaces/PollInterface';
+import { PrismaService } from 'src/infra/clients/prisma.service';
 
 @Injectable()
 export class FeedService {
@@ -23,6 +24,7 @@ export class FeedService {
     private likesServices: LikesService,
     private repliesServices: RepliesService,
     private pollsService: PollsService,
+    private prismaService: PrismaService,
   ) {}
 
   private setGetPostsUrl(address: string, assetId: number): string {
@@ -145,6 +147,12 @@ export class FeedService {
       console.error('Error creating post:', error);
       return null;
     }
+  }
+
+  public async createNewPost() {
+    const result = await this.prismaService.post.create({
+      data: { creator_address: 'something' },
+    });
   }
 
   public async getFeedByWalletAddress(
