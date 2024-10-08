@@ -38,7 +38,7 @@ export class LikesService {
     return likesList.transactions
       .filter((like) => atob(like.note).split(':')[3] == postTransactionId)
       .map((filteredLike) => {
-        return { creator_address: filteredLike.sender };
+        return { creator_address: filteredLike.sender, postTransactionId: postTransactionId, transactionId: filteredLike.id };
       });
   }
 }

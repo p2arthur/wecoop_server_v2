@@ -33,6 +33,7 @@ export class RepliesService {
           text: postText,
           creator_address: creatorAddress,
           transaction_id: transactionId,
+          postTransactionId: postTransactionId,
           timestamp,
           country,
           likes: replyLikes,

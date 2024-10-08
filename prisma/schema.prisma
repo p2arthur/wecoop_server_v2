@@ -15,6 +15,33 @@ datasource db {
 
 
 model Post {
- id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  transaction_id String @unique
   creator_address String
+  text String
+
+  timestamp Int
+  country String
+  assetId Int
 }
+
+model Like {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  transaction_id String @unique
+  creator_address String
+  post_transaction_id String
+}
+
+
+model Reply {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  transaction_id String @unique
+  post_transaction_id String
+  creator_address String
+  text String
+  timestamp Int
+  country String
+  assetId Int
+}
+
+

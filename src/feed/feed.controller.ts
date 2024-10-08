@@ -42,9 +42,9 @@ export class FeedController {
     return postsList;
   }
 
-  @Get('/fodase/createFella')
+  @Get('/sync-on-chain/mongodb')
   async createNewPost() {
-    const result = await this.feedService.createNewPost();
+    const result = await this.feedService.processAndSaveTransactions();
 
     console.log('create into db', result);
     return result;
