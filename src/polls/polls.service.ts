@@ -139,16 +139,12 @@ export class PollsService {
         const question = decoder.decode(questionBytes).trim();
 
         // Get the true timestamp using a helper function
-        const trueTimestamp = await getRoundTimestamp(
-          this.algodClient,
-          Number(timestamp),
-        );
 
         // Construct the poll object, including votes
         const poll: PollInterface = {
           text: question,
           pollId: Number(pollId),
-          timestamp: Number(trueTimestamp),
+          timestamp: Number(timestamp),
           creator_address: creatorAddress,
           status: 'accepted',
           assetId: Number(selectedAsset),
@@ -214,7 +210,12 @@ export class PollsService {
           .getApplicationBoxByName(Number(wecoopDaoAppId), box.name)
           .do();
 
-        const claimedBytes = voteInfoBytes.value.slice(0, 1); // First byte for claimed (0 or 1)
+        console.log('voteInfoBytes', voteInfoBytes);
+
+        const claimedBytes = voteInfoBytes.value.slice(7, 8); // First byte for claimed (0 or 1)
+
+        console.log('claimed bytes', claimedBytes);
+
         const claimed = claimedBytes[0] ? true : false; // Since it's a single byte, just use the first byte
 
         // Store the vote info
