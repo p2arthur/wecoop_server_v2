@@ -37,6 +37,120 @@ export class FeedService {
     this.postsList = [];
   }
 
+  public async getAllPostsFromMongo(page: number, pageSize: number): Promise<any> {
+    const skip = (page - 1) * pageSize;
+
+    // Buscar dados paginados
+    const dataPromise = this.prismaService.post.aggregateRaw({
+      pipeline: [
+        {
+          $lookup: {
+            from: 'Reply',
+            localField: 'transaction_id',
+            foreignField: 'post_transaction_id',
+            as: 'replies',
+          },
+        },
+        {
+          $lookup: {
+            from: 'Like',
+            localField: 'transaction_id',
+            foreignField: 'post_transaction_id',
+            as: 'likes',
+          },
+        },
+        {
+          $addFields: {
+            type: 'post',
+          },
+        },
+        {
+          $unionWith: {
+            coll: 'Poll',
+            pipeline: [
+              {
+                $lookup: {
+                  from: 'Voter',
+                  localField: 'pollId',
+                  foreignField: 'pollId',
+                  as: 'voters',
+                },
+              },
+              {
+                $addFields: {
+                  type: 'poll',
+                },
+              },
+            ],
+          },
+        },
+        {
+          $sort: {
+            timestamp: -1,
+          },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: pageSize,
+        },
+      ],
+    });
+
+    // Obter contagem total
+    const countPromise = this.prismaService.post.aggregateRaw({
+      pipeline: [
+        {
+          $addFields: {
+            type: 'post',
+          },
+        },
+        {
+          $unionWith: {
+            coll: 'Poll',
+            pipeline: [
+              {
+                $addFields: {
+                  type: 'poll',
+                },
+              },
+            ],
+          },
+        },
+        {
+          $count: 'totalCount',
+        },
+      ],
+    });
+
+    const [data, countResult] = await Promise.all([dataPromise, countPromise]);
+
+    // Fazer type assertion para informar ao TypeScript a estrutura dos dados
+    const totalCount = ((countResult[0] as { totalCount: number })?.totalCount) || 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      data,
+      totalCount,
+      totalPages,
+      currentPage: page,
+    };
+  }
+
+  private handleText(postText: string): string {
+    let decodedText: string
+    try {
+      // Ensure %0A is replaced with actual newlines (\n)
+      decodedText = decodeURIComponent(postText).replace(/%0A/g, '\n')
+    } catch (error) {
+      console.error('Error decoding URI component:', error, 'postText', postText)
+      // If decoding fails, return the original text or handle accordingly
+      decodedText = postText
+    }
+    return decodedText
+  }
+
   // Function to separate the posts, likes, and replies and save them in Prisma
   public async processAndSaveTransactions(): Promise<string> {
     this.resetPostsList();
@@ -99,9 +213,11 @@ export class FeedService {
       }
     }
 
+
     // Usar upsert para garantir que não há conflitos de transação ao salvar os posts
     await Promise.all(
       postArray.map(async (post) => {
+
         await this.prismaService.post.upsert({
           where: { transaction_id: post.transaction_id as string },
           create: {
@@ -110,7 +226,7 @@ export class FeedService {
             assetId: post.assetId,
             timestamp: post.timestamp,
             country: post.country,
-            text: decodeURIComponent(post.text),
+            text: this.handleText(post.text),
           },
           update: {}, // Deixe vazio para não atualizar caso o registro já exista
         });
@@ -192,7 +308,7 @@ export class FeedService {
             creator_address: reply.creator_address,
             transaction_id: reply.transaction_id,
             post_transaction_id: reply.postTransactionId,
-            text: decodeURIComponent(reply.text),
+            text: this.handleText(reply.text),
             assetId: reply.assetId,
             timestamp: reply.timestamp,
             country: reply.country,
@@ -206,6 +322,8 @@ export class FeedService {
 
     return 'Transações processadas e salvas com sucesso!';
   }
+
+
 
 
 
