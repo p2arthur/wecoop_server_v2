@@ -54,7 +54,6 @@ export class FeedService {
       axios.get(repliesUrl).then((res) => res.data),
     ]);
 
-    // Obter todas as transações relacionadas a posts
     const allPostTransactions = (
       await Promise.all(
         usableAssetsList.map(async (usableAsset) => {
@@ -68,10 +67,14 @@ export class FeedService {
       )
     ).flat();
 
+    const allPolls = await this.pollsService.getAllPolls();
+    const allVoters = await this.pollsService.getAllVotes();
+
     // Arrays para armazenar os dados
     const postArray = [];
     const likesArray = [];
     const repliesArray = [];
+    const pollsArray = allPolls;
 
     // Processar cada transação de post
     for (const transaction of allPostTransactions) {
@@ -92,80 +95,118 @@ export class FeedService {
           post.replies.forEach((reply) => {
             repliesArray.push(reply);
           });
-
         }
       }
     }
 
-    console.log(likesArray, 'likes')
-    console.log(repliesArray, 'replies')
-
-    // Verificar e salvar os posts
+    // Usar upsert para garantir que não há conflitos de transação ao salvar os posts
     await Promise.all(
       postArray.map(async (post) => {
-        const postExists = await this.prismaService.post.findUnique({
+        await this.prismaService.post.upsert({
           where: { transaction_id: post.transaction_id as string },
+          create: {
+            creator_address: post.creator_address,
+            transaction_id: post.transaction_id,
+            assetId: post.assetId,
+            timestamp: post.timestamp,
+            country: post.country,
+            text: decodeURIComponent(post.text),
+          },
+          update: {}, // Deixe vazio para não atualizar caso o registro já exista
         });
-
-        if (!postExists) {
-          await this.prismaService.post.create({
-            data: {
-              creator_address: post.creator_address,
-              transaction_id: post.transaction_id,
-              assetId: post.assetId,
-              timestamp: post.timestamp,
-              country: post.country,
-              text: decodeURIComponent(post.text),
-            },
-          });
-        }
       })
     );
 
-    // Verificar e salvar os likes
+    console.log('Posts salvos com sucesso!');
+
+    // Usar upsert para polls
+    await Promise.all(
+      pollsArray.map(async (poll) => {
+        await this.prismaService.poll.upsert({
+          where: { pollId: poll.pollId },
+          create: {
+            creator_address: poll.creator_address,
+            pollId: poll.pollId,
+            status: poll.status,
+            assetId: poll.assetId,
+            timestamp: poll.timestamp,
+            country: poll.country,
+            text: decodeURIComponent(poll.text),
+            depositedAmount: poll.depositedAmount,
+            totalVotes: poll.totalVotes,
+            yesVotes: poll.yesVotes,
+            expiry_timestamp: poll.expiry_timestamp,
+          },
+          update: {}, // Deixe vazio se não quiser atualizar
+        });
+      })
+    );
+
+    console.log('Polls salvos com sucesso!');
+
+    // Usar upsert para voters
+    await Promise.all(
+      allVoters.map(async (voter) => {
+        await this.prismaService.voter.upsert({
+          where: {
+            pollId_voterAddress: {
+              pollId: voter.pollId,
+              voterAddress: voter.voterAddress,
+            },
+          },
+          create: {
+            pollId: voter.pollId,
+            voterAddress: voter.voterAddress,
+            claimed: voter.claimed,
+          },
+          update: {}, // Deixe vazio para não atualizar
+        });
+      })
+    );
+
+    console.log('Voters salvos com sucesso!');
+
+    // Usar upsert para likes
     await Promise.all(
       likesArray.map(async (like) => {
-        const likeExists = await this.prismaService.like.findUnique({
+        await this.prismaService.like.upsert({
           where: { transaction_id: like.transactionId },
+          create: {
+            creator_address: like.creator_address,
+            transaction_id: like.transactionId,
+            post_transaction_id: like.postTransactionId,
+          },
+          update: {}, // Deixe vazio se não quiser atualizar
         });
-
-        if (!likeExists) {
-          await this.prismaService.like.create({
-            data: {
-              creator_address: like.creator_address,
-              transaction_id: like.transactionId,
-              post_transaction_id: like.postTransactionId,
-            },
-          });
-        }
       })
     );
 
-    // Verificar e salvar os replies
+    console.log('Likes salvos com sucesso!');
+
+    // Usar upsert para replies
     await Promise.all(
       repliesArray.map(async (reply) => {
-        const replyExists = await this.prismaService.reply.findUnique({
+        await this.prismaService.reply.upsert({
           where: { transaction_id: reply.transaction_id },
+          create: {
+            creator_address: reply.creator_address,
+            transaction_id: reply.transaction_id,
+            post_transaction_id: reply.postTransactionId,
+            text: decodeURIComponent(reply.text),
+            assetId: reply.assetId,
+            timestamp: reply.timestamp,
+            country: reply.country,
+          },
+          update: {}, // Deixe vazio se não quiser atualizar
         });
-
-        if (!replyExists) {
-          await this.prismaService.reply.create({
-            data: {
-              creator_address: reply.creator_address,
-              transaction_id: reply.transaction_id,
-              post_transaction_id: reply.postTransactionId,
-              text: decodeURIComponent(reply.text),
-              assetId: reply.assetId,
-              timestamp: reply.timestamp,
-              country: reply.country,
-            },
-          });
-        }
       })
     );
+
+    console.log('Replies salvos com sucesso!');
 
     return 'Transações processadas e salvas com sucesso!';
   }
+
 
 
   // Refactor to loop over usableAssetsList
@@ -237,7 +278,10 @@ export class FeedService {
 
     const allPolls = await this.pollsService.getAllPolls();
 
+
     this.pollsList = allPolls.sort((a, b) => b.timestamp - a.timestamp);
+
+    console.log(allPolls, 'allPols')
 
     return [...this.postsList, ...this.pollsList].sort(
       (b, a) => a.timestamp - b.timestamp,

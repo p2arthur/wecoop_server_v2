@@ -19,7 +19,6 @@ model Post {
   transaction_id String @unique
   creator_address String
   text String
-
   timestamp Int
   country String
   assetId Int
@@ -43,5 +42,31 @@ model Reply {
   country String
   assetId Int
 }
+
+
+model Poll {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  pollId  Int @unique
+  creator_address String
+  text String
+  timestamp Int
+  country String
+  assetId Int
+  depositedAmount Int
+  totalVotes Int
+  yesVotes Int
+  expiry_timestamp Int
+  status String
+}
+
+model Voter {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  pollId Int
+  voterAddress String
+  claimed Boolean
+
+  @@unique([pollId, voterAddress])
+}
+
 
 
