@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import algosdk, { Algodv2, decodeUint64, encodeAddress } from 'algosdk';
+import { PrismaService } from 'src/infra/clients/prisma.service';
 import { PollInterface, VoterInterface } from 'src/interfaces/PollInterface';
 import { getRoundTimestamp } from 'src/utils/getRoundTimestamp';
 
 @Injectable()
 export class PollsService {
-  constructor() {}
+  constructor(private prismaServices: PrismaService) {}
 
   private algodClient = new algosdk.Algodv2(
     process.env.ALGOD_TOKEN,
@@ -222,5 +223,25 @@ export class PollsService {
     }
 
     return allVotes;
+  }
+
+  async createPoll(poll: PollInterface) {
+    const result = await this.prismaServices.poll.create({
+      data: {
+        pollId: poll.pollId,
+        creator_address: poll.creator_address,
+        text: poll.text,
+        timestamp: poll.timestamp,
+        expiry_timestamp: poll.expiry_timestamp,
+        country: poll.country,
+        depositedAmount: poll.depositedAmount,
+        assetId: poll.assetId,
+        totalVotes: 0,
+        yesVotes: 0,
+        status: 'accepted',
+      },
+    });
+
+    console.error('result of creating poll on db', result);
   }
 }

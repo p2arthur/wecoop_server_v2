@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { PollsService } from './polls.service';
+import { PollInterface } from 'src/interfaces/PollInterface';
 
 @Controller('polls')
 export class PollsController {
@@ -10,5 +11,16 @@ export class PollsController {
     const allPolls = await this.pollsServices.getAllPolls();
 
     return allPolls;
+  }
+
+  @Post('/create')
+  async createNewPoll(@Body() poll: PollInterface) {
+    try {
+      const result = await this.pollsServices.createPoll(poll);
+      return { message: 'Poll created successfully', poll: result };
+    } catch (error) {
+      console.error('Error creating poll:', error);
+      return { message: 'Failed to create poll', error: error.message };
+    }
   }
 }
