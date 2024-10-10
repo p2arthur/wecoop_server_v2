@@ -37,7 +37,10 @@ export class FeedService {
     this.postsList = [];
   }
 
-  public async getAllPostsFromMongo(page: number, pageSize: number): Promise<any> {
+  public async getAllPostsFromMongo(
+    page: number,
+    pageSize: number,
+  ): Promise<any> {
     const skip = (page - 1) * pageSize;
 
     // Buscar dados paginados
@@ -127,7 +130,8 @@ export class FeedService {
     const [data, countResult] = await Promise.all([dataPromise, countPromise]);
 
     // Fazer type assertion para informar ao TypeScript a estrutura dos dados
-    const totalCount = ((countResult[0] as { totalCount: number })?.totalCount) || 0;
+    const totalCount =
+      (countResult[0] as { totalCount: number })?.totalCount || 0;
     const totalPages = Math.ceil(totalCount / pageSize);
 
     return {
@@ -139,16 +143,21 @@ export class FeedService {
   }
 
   private handleText(postText: string): string {
-    let decodedText: string
+    let decodedText: string;
     try {
       // Ensure %0A is replaced with actual newlines (\n)
-      decodedText = decodeURIComponent(postText).replace(/%0A/g, '\n')
+      decodedText = decodeURIComponent(postText).replace(/%0A/g, '\n');
     } catch (error) {
-      console.error('Error decoding URI component:', error, 'postText', postText)
+      console.error(
+        'Error decoding URI component:',
+        error,
+        'postText',
+        postText,
+      );
       // If decoding fails, return the original text or handle accordingly
-      decodedText = postText
+      decodedText = postText;
     }
-    return decodedText
+    return decodedText;
   }
 
   // Function to separate the posts, likes, and replies and save them in Prisma
@@ -213,11 +222,9 @@ export class FeedService {
       }
     }
 
-
     // Usar upsert para garantir que não há conflitos de transação ao salvar os posts
     await Promise.all(
       postArray.map(async (post) => {
-
         await this.prismaService.post.upsert({
           where: { transaction_id: post.transaction_id as string },
           create: {
@@ -230,10 +237,8 @@ export class FeedService {
           },
           update: {}, // Deixe vazio para não atualizar caso o registro já exista
         });
-      })
+      }),
     );
-
-    console.log('Posts salvos com sucesso!');
 
     // Usar upsert para polls
     await Promise.all(
@@ -255,10 +260,8 @@ export class FeedService {
           },
           update: {}, // Deixe vazio se não quiser atualizar
         });
-      })
+      }),
     );
-
-    console.log('Polls salvos com sucesso!');
 
     // Usar upsert para voters
     await Promise.all(
@@ -277,10 +280,8 @@ export class FeedService {
           },
           update: {}, // Deixe vazio para não atualizar
         });
-      })
+      }),
     );
-
-    console.log('Voters salvos com sucesso!');
 
     // Usar upsert para likes
     await Promise.all(
@@ -294,10 +295,8 @@ export class FeedService {
           },
           update: {}, // Deixe vazio se não quiser atualizar
         });
-      })
+      }),
     );
-
-    console.log('Likes salvos com sucesso!');
 
     // Usar upsert para replies
     await Promise.all(
@@ -315,17 +314,11 @@ export class FeedService {
           },
           update: {}, // Deixe vazio se não quiser atualizar
         });
-      })
+      }),
     );
-
-    console.log('Replies salvos com sucesso!');
 
     return 'Transações processadas e salvas com sucesso!';
   }
-
-
-
-
 
   // Refactor to loop over usableAssetsList
   public async getAllPosts(walletAddres?: string): Promise<any[]> {
@@ -344,8 +337,6 @@ export class FeedService {
       axios.get(likesUrl).then((res) => res.data),
       axios.get(repliesUrl).then((res) => res.data),
     ]);
-
-
 
     // Loop through the usableAssetsList and get transactions for each asset
     const allPostTransactions = (
@@ -366,8 +357,6 @@ export class FeedService {
       (a, b) => b['confirmed-round'] - a['confirmed-round'],
     );
 
-
-
     // Process transactions into posts
     for (const transaction of sortedPostTransactions) {
       // Verifique se já existe um post com o mesmo transaction_id
@@ -380,8 +369,6 @@ export class FeedService {
         if (post) this.postsList.push(post);
       }
     }
-
-
 
     // Encontrar o post com mais likes
     let topPost = this.postsList.reduce((top, current) => {
@@ -396,10 +383,9 @@ export class FeedService {
 
     const allPolls = await this.pollsService.getAllPolls();
 
-
     this.pollsList = allPolls.sort((a, b) => b.timestamp - a.timestamp);
 
-    console.log(allPolls, 'allPols')
+    console.log(allPolls, 'allPols');
 
     return [...this.postsList, ...this.pollsList].sort(
       (b, a) => a.timestamp - b.timestamp,

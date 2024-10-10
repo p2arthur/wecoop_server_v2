@@ -20,8 +20,6 @@ export class PollsService {
       .getApplicationBoxes(Number(wecoopDaoAppId))
       .do();
 
-    console.log('boxes response', boxesResponse);
-
     const allPolls: PollInterface[] = [];
 
     const decoder = new TextDecoder('utf-8');
@@ -203,18 +201,12 @@ export class PollsService {
 
         const voterAddress = encodeAddress(voterBytes); // Decode as an Algorand address
 
-        console.log('Poll ID:', pollId, 'Voter Address:', voterAddress);
-
         // Now retrieve and decode the box content (VoteInfo)
         const voteInfoBytes = await this.algodClient
           .getApplicationBoxByName(Number(wecoopDaoAppId), box.name)
           .do();
 
-        console.log('voteInfoBytes', voteInfoBytes);
-
         const claimedBytes = voteInfoBytes.value.slice(7, 8); // First byte for claimed (0 or 1)
-
-        console.log('claimed bytes', claimedBytes);
 
         const claimed = claimedBytes[0] ? true : false; // Since it's a single byte, just use the first byte
 
@@ -224,8 +216,6 @@ export class PollsService {
           voterAddress,
           claimed,
         });
-
-        console.log('allVotes', allVotes);
       } catch (error) {
         console.error('Error decoding vote:', error);
       }

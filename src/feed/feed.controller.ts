@@ -46,7 +46,6 @@ export class FeedController {
   async createNewPost() {
     const result = await this.feedService.processAndSaveTransactions();
 
-    console.log('create into db', result);
     return result;
   }
 
