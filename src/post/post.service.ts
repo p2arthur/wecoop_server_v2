@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import axios from 'axios';
 import base64 from 'base-64';
 import { AssetId } from 'src/enums/AssetId';
@@ -22,6 +22,17 @@ export class PostService {
 
   // Cria um post
   public async createPost(data: Prisma.PostCreateInput) {
+    // Verifica se o transaction_id já existe
+    const existingPost = await this.prismaService.post.findUnique({
+      where: { transaction_id: data.transaction_id },
+    });
+
+    // Se o transaction_id já existir, lança uma exceção
+    if (existingPost) {
+      throw new BadRequestException('A post with this transaction_id already exists');
+    }
+
+    // Caso contrário, cria o post normalmente
     return this.prismaService.post.create({ data });
   }
 

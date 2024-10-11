@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { PollsService } from './polls.service';
 import { PollInterface } from 'src/interfaces/PollInterface';
 import { Prisma } from '@prisma/client';
@@ -34,5 +34,13 @@ export class PollsController {
       console.error('Error casting vote:', error);
       return { message: 'Failed to cast vote', error: error.message };
     }
+  }
+
+  @Patch(':voterAddress/:transaction_id/claim')
+  async claimVoter(
+    @Param('voterAddress') voterAddress: string,
+    @Param('transaction_id') pollId: number,
+  ) {
+    return this.pollsServices.claimVoter(voterAddress, pollId);
   }
 }

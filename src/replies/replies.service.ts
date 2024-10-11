@@ -13,7 +13,7 @@ export class RepliesService {
   constructor(private likesService: LikesService, private prismaService: PrismaService,) {}
 
   // Cria um reply
-  public async createReply(data: Prisma.ReplyCreateInput) {
+  public async createReply(data: Prisma.ReplyUncheckedCreateInput) {
     return this.prismaService.reply.create({ data });
   }
 

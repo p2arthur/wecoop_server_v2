@@ -145,8 +145,10 @@ export class FeedService {
   private handleText(postText: string): string {
     let decodedText: string;
     try {
+      // Verificar se o texto contém um % isolado que pode quebrar o decodeURIComponent
+      const safeText = postText.replace(/%(?![0-9A-Fa-f]{2})/g, '%25'); // Substitui % inválido por %25
       // Ensure %0A is replaced with actual newlines (\n)
-      decodedText = decodeURIComponent(postText).replace(/%0A/g, '\n');
+      decodedText = decodeURIComponent(safeText).replace(/%0A/g, '\n');
     } catch (error) {
       console.error(
         'Error decoding URI component:',

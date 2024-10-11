@@ -232,6 +232,16 @@ export class PollsService {
     })
   }
 
+  async claimVoter(voterAddress: string, pollId: number) {
+    return this.prismaServices.voter.updateMany({
+      where: {
+        voterAddress,
+        pollId
+      },
+      data: { claimed: true },
+    });
+  }
+
 
   async createPoll(poll: PollInterface) {
     const result = await this.prismaServices.poll.create({
