@@ -2,10 +2,21 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import base64 from 'base-64';
 import { NotePrefix } from 'src/enums/NotePrefix';
+import { PrismaService } from '../infra/clients/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class LikesService {
+  constructor(
+    private prismaService: PrismaService,
+  ) {}
   public likesList: any[];
+
+
+  public async createLike(data: Prisma.LikeCreateInput) {
+    return this.prismaService.like.create({ data });
+  }
+
 
   public async getAllLikes() {
     const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(

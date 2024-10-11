@@ -35,7 +35,7 @@ model Reply {
   timestamp          Int
   country            String
   assetId            Int
-  post               Post   @relation("PostReplies", fields: [post_transaction_id], references: [transaction_id])
+  post               Post?   @relation("PostReplies", fields: [post_transaction_id], references: [transaction_id])
 
   @@index([post_transaction_id])
 }

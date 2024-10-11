@@ -7,13 +7,41 @@ import { NotePrefix } from 'src/enums/NotePrefix';
 import { PostInterface } from 'src/interfaces/PostInterface';
 import { LikesService } from 'src/likes/likes.service';
 import { RepliesService } from 'src/replies/replies.service';
+import { PrismaService } from '../infra/clients/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PostService {
   constructor(
     private likesServices: LikesService,
     private repliesServices: RepliesService,
+    private prismaService: PrismaService,
   ) {}
+
+  // ------------- MONGODB --------------------
+
+  // Cria um post
+  public async createPost(data: Prisma.PostCreateInput) {
+    return this.prismaService.post.create({ data });
+  }
+
+  // Busca um post por ID
+  public async getPostById(id: string) {
+    return this.prismaService.post.findUnique({ where: { id } });
+  }
+
+  // Atualiza um post
+  public async updatePost(id: string, data: Prisma.PostUpdateInput) {
+    return this.prismaService.post.update({
+      where: { id },
+      data,
+    });
+  }
+
+  // Deleta um post
+  async deletePost(id: string) {
+    return this.prismaService.post.delete({ where: { id } });
+  }
 
   private notePrefix: string = NotePrefix.WeCoopPost;
 

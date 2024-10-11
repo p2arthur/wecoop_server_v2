@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { PollsService } from './polls.service';
 import { PollInterface } from 'src/interfaces/PollInterface';
+import { Prisma } from '@prisma/client';
 
 @Controller('polls')
 export class PollsController {
@@ -21,6 +22,17 @@ export class PollsController {
     } catch (error) {
       console.error('Error creating poll:', error);
       return { message: 'Failed to create poll', error: error.message };
+    }
+  }
+
+  @Post('/vote')
+  async voteOnPoll(@Body() voter: Prisma.VoterCreateInput) {
+    try {
+      const result = await this.pollsServices.createVoter(voter);
+      return { message: 'Vote cast successfully', vote: result };
+    } catch (error) {
+      console.error('Error casting vote:', error);
+      return { message: 'Failed to cast vote', error: error.message };
     }
   }
 }

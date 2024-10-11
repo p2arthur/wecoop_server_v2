@@ -3,6 +3,7 @@ import algosdk, { Algodv2, decodeUint64, encodeAddress } from 'algosdk';
 import { PrismaService } from 'src/infra/clients/prisma.service';
 import { PollInterface, VoterInterface } from 'src/interfaces/PollInterface';
 import { getRoundTimestamp } from 'src/utils/getRoundTimestamp';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PollsService {
@@ -224,6 +225,13 @@ export class PollsService {
 
     return allVotes;
   }
+
+  async createVoter(data: Prisma.VoterCreateInput) {
+    return this.prismaServices.voter.create({
+      data
+    })
+  }
+
 
   async createPoll(poll: PollInterface) {
     const result = await this.prismaServices.poll.create({

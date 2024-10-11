@@ -160,7 +160,6 @@ export class FeedService {
     return decodedText;
   }
 
-  // Function to separate the posts, likes, and replies and save them in Prisma
   public async processAndSaveTransactions(): Promise<string> {
     this.resetPostsList();
 

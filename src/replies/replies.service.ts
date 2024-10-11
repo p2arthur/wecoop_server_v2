@@ -3,12 +3,19 @@ import axios from 'axios';
 import { NotePrefix } from 'src/enums/NotePrefix';
 import { PostInterface } from 'src/interfaces/PostInterface';
 import { LikesService } from 'src/likes/likes.service';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../infra/clients/prisma.service';
 
 @Injectable()
 export class RepliesService {
   public replies: PostInterface[] = [];
 
-  constructor(private likesService: LikesService) {}
+  constructor(private likesService: LikesService, private prismaService: PrismaService,) {}
+
+  // Cria um reply
+  public async createReply(data: Prisma.ReplyCreateInput) {
+    return this.prismaService.reply.create({ data });
+  }
 
   public filterRepliesByPostTransactionId(
     postTransactionId: string,
