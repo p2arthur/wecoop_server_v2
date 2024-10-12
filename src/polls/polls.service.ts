@@ -217,6 +217,7 @@ export class PollsService {
           pollId: Number(pollId),
           voterAddress,
           claimed,
+          inFavor: true,
         });
       } catch (error) {
         console.error('Error decoding vote:', error);
@@ -226,22 +227,45 @@ export class PollsService {
     return allVotes;
   }
 
-  async createVoter(data: Prisma.VoterCreateInput) {
+  async createVoter(data: Prisma.VoterUncheckedCreateInput) {
+    console.log('vote data #$%#&*W#%$', data);
+
+    const pollId = data.pollId;
+    const result = await this.prismaServices.$transaction([
+      this.prismaServices.poll.update({
+        where: { pollId },
+        data: {
+          totalVotes: {
+            increment: 1,
+          },
+          yesVotes: data.in_favor
+            ? {
+                increment: 1,
+              }
+            : undefined,
+        },
+      }),
+      this.prismaServices.voter.create({
+        data,
+      }),
+    ]);
+
+    console.log('Updated poll after vote:', result);
+
     return this.prismaServices.voter.create({
-      data
-    })
+      data,
+    });
   }
 
   async claimVoter(voterAddress: string, pollId: number) {
     return this.prismaServices.voter.updateMany({
       where: {
         voterAddress,
-        pollId
+        pollId,
       },
       data: { claimed: true },
     });
   }
-
 
   async createPoll(poll: PollInterface) {
     const result = await this.prismaServices.poll.create({

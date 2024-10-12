@@ -18,4 +18,5 @@ export interface VoterInterface {
   pollId: number;
   voterAddress: string;
   claimed: boolean;
+  inFavor: boolean;
 }

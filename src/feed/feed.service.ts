@@ -278,6 +278,7 @@ export class FeedService {
             pollId: voter.pollId,
             voterAddress: voter.voterAddress,
             claimed: voter.claimed,
+            in_favor: voter.inFavor,
           },
           update: {}, // Deixe vazio para não atualizar
         });

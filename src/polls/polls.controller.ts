@@ -26,7 +26,7 @@ export class PollsController {
   }
 
   @Post('/vote')
-  async voteOnPoll(@Body() voter: Prisma.VoterCreateInput) {
+  async voteOnPoll(@Body() voter: Prisma.VoterUncheckedCreateInput) {
     try {
       const result = await this.pollsServices.createVoter(voter);
       return { message: 'Vote cast successfully', vote: result };
