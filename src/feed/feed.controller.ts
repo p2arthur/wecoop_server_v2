@@ -52,7 +52,6 @@ export class FeedController {
   @Get('/global/mongodb')
   async getPostsByMongo() {
     const result = await this.feedService.getAllPostsFromMongo(1, 620);
-
     return result;
   }
 }

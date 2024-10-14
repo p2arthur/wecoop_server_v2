@@ -36,11 +36,11 @@ export class PollsController {
     }
   }
 
-  @Patch(':voterAddress/:transaction_id/claim')
+  @Patch(':voterAddress/:pollId/claim')
   async claimVoter(
     @Param('voterAddress') voterAddress: string,
-    @Param('transaction_id') pollId: number,
+    @Param('pollId') pollId: number,
   ) {
-    return this.pollsServices.claimVoter(voterAddress, pollId);
+    return this.pollsServices.claimVoter(voterAddress, Number(pollId));
   }
 }

@@ -450,78 +450,22 @@ export class FeedService {
 
   public async getFeedByAssetId(assetId: number) {
     this.resetPostsList();
-    //TODO - Move likes logic to its own service - This is testing
-    const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
-      NotePrefix.WeCoopLike,
-    )}&tx-type=axfer`;
-    const repliesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
-      NotePrefix.WeCoopReply,
-    )}&tx-type=axfer`;
 
-    const { data: allLikes } = await axios.get(likesUrl);
-    const { data: allReplies } = await axios.get(repliesUrl);
+    console.log('asset id', assetId);
 
-    const postsUrl = this.setGetPostsUrl(
-      WalletAddress.WeCoopMainAddress,
-      assetId,
-    );
+    const postsMadeWithAssetId = await this.prismaService.post.findMany({
+      where: { assetId: Number(assetId) },
+      select: {
+        transaction_id: true,
+        creator_address: true,
+        text: true,
+        timestamp: true,
+        country: true,
+        assetId: true,
+      },
+    });
 
-    const { data: postsData } = await axios.get(postsUrl);
-    const { transactions: postsTransactions } = postsData;
-
-    const allPostTransactions = postsTransactions;
-
-    const sortedPostTransactions = allPostTransactions.sort(
-      (a, b) => b['confirmed-round'] - a['confirmed-round'],
-    );
-
-    let post: any = {};
-
-    for (let transaction of sortedPostTransactions) {
-      const encodedNote = transaction.note;
-
-      const decodedNote = atob(encodedNote);
-      if (!decodedNote) return;
-      const postData = decodedNote.split(':');
-      const postCountry = postData[2];
-      const postText = postData[3];
-      const creatorAddress = transaction.sender;
-      const transactionId = transaction.id;
-      const timestamp = transaction['round-time'];
-      const assetId = transaction['asset-transfer-transaction']['asset-id'];
-
-      post = {
-        text: postText,
-        creator_address: creatorAddress,
-        transaction_id: transactionId,
-        timestamp,
-        country: postCountry,
-        likes: 0,
-        replies: [],
-        status: 'accepted',
-        assetId,
-      };
-
-      const postLikes = this.likesServices.filterLikesByPostTransactionId(
-        transaction.id,
-        allLikes,
-      );
-
-      const postReplies = this.repliesServices.filterRepliesByPostTransactionId(
-        transaction.id,
-        allReplies,
-        allLikes,
-      );
-
-      Object.assign(post, {
-        likes: postLikes,
-        replies: postReplies,
-      });
-
-      this.postsList.push(post);
-    }
-
-    return this.postsList;
+    console.log('posts by asset id', postsMadeWithAssetId);
   }
 
   public async getAllPostsByAddress(walletAddress: string) {
