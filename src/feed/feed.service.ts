@@ -279,6 +279,7 @@ export class FeedService {
             voterAddress: voter.voterAddress,
             claimed: voter.claimed,
             in_favor: voter.inFavor,
+            deposited_amount: 1,
           },
           update: {}, // Deixe vazio para não atualizar
         });

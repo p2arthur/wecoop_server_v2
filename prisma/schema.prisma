@@ -73,6 +73,7 @@ model Voter {
   claimed      Boolean
   poll         Poll   @relation(fields: [pollId], references: [pollId])
   in_favor Boolean
+  deposited_amount Int
 
   @@unique([pollId, voterAddress])
   @@index([pollId])

@@ -238,6 +238,7 @@ export class PollsService {
           totalVotes: {
             increment: 1,
           },
+          depositedAmount: { increment: data.deposited_amount },
           yesVotes: data.in_favor
             ? {
                 increment: 1,
