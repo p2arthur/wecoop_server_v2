@@ -49,9 +49,15 @@ export class FeedController {
     return result;
   }
 
+
   @Get('/global/mongodb')
   async getPostsByMongo() {
     const result = await this.feedService.getAllPostsFromMongo(1, 620);
+    return result;
+  }
+  @Get('/global/polls/mongodb')
+  async getPollsByMongo() {
+    const result = await this.feedService.getAllPollsFromMongo(1, 620);
     return result;
   }
 }

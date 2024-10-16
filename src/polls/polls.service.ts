@@ -15,6 +15,26 @@ export class PollsService {
     process.env.ALGOD_PORT,
   );
 
+  async getPollsByVoterAddress(voterAddress: string) {
+    return this.prismaServices.poll.aggregateRaw({
+      pipeline: [
+        {
+          $lookup: {
+            from: 'Voter',
+            localField: 'pollId',
+            foreignField: 'pollId',
+            as: 'voters',
+          },
+        },
+        {
+          $match: {
+            'voters.voterAddress': voterAddress,
+          },
+        },
+      ],
+    });
+  }
+
   async getAllPolls(): Promise<PollInterface[]> {
     const wecoopDaoAppId = process.env.WECOOP_POLL_APP_ID;
 

@@ -141,6 +141,70 @@ export class FeedService {
       currentPage: page,
     };
   }
+  public async getAllPollsFromMongo(
+    page: number,
+    pageSize: number,
+  ): Promise<any> {
+    const skip = (page - 1) * pageSize;
+
+    // Buscar dados paginados de Polls
+    const dataPromise = this.prismaService.poll.aggregateRaw({
+      pipeline: [
+        {
+          $lookup: {
+            from: 'Voter',
+            localField: 'pollId',
+            foreignField: 'pollId',
+            as: 'voters',
+          },
+        },
+        {
+          $addFields: {
+            type: 'poll',
+          },
+        },
+        {
+          $sort: {
+            timestamp: -1,
+          },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: pageSize,
+        },
+      ],
+    });
+
+    // Obter contagem total de Polls
+    const countPromise = this.prismaService.poll.aggregateRaw({
+      pipeline: [
+        {
+          $addFields: {
+            type: 'poll',
+          },
+        },
+        {
+          $count: 'totalCount',
+        },
+      ],
+    });
+
+    const [data, countResult] = await Promise.all([dataPromise, countPromise]);
+
+    const totalCount = (countResult[0] as { totalCount: number })?.totalCount || 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      data,
+      totalCount,
+      totalPages,
+      currentPage: page,
+    };
+  }
+
+
 
   private handleText(postText: string): string {
     let decodedText: string;

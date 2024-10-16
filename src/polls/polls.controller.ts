@@ -36,6 +36,11 @@ export class PollsController {
     }
   }
 
+  @Get('voter/:voterAddress')
+  async getPollsByVoterAddress(@Param('voterAddress') voterAddress: string) {
+    return this.pollsServices.getPollsByVoterAddress(voterAddress);
+  }
+
   @Patch(':voterAddress/:pollId/claim')
   async claimVoter(
     @Param('voterAddress') voterAddress: string,
