@@ -7,16 +7,12 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class LikesService {
-  constructor(
-    private prismaService: PrismaService,
-  ) {}
+  constructor(private prismaService: PrismaService) {}
   public likesList: any[];
-
 
   public async createLike(data: Prisma.LikeCreateInput) {
     return this.prismaService.like.create({ data });
   }
-
 
   public async getAllLikes() {
     const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(
@@ -49,7 +45,11 @@ export class LikesService {
     return likesList.transactions
       .filter((like) => atob(like.note).split(':')[3] == postTransactionId)
       .map((filteredLike) => {
-        return { creator_address: filteredLike.sender, postTransactionId: postTransactionId, transactionId: filteredLike.id };
+        return {
+          creator_address: filteredLike.sender,
+          postTransactionId: postTransactionId,
+          transactionId: filteredLike.id,
+        };
       });
   }
 }

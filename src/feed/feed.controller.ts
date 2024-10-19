@@ -13,14 +13,14 @@ export class FeedController {
   async getAllPosts() {
     const response = await this.feedService.getAllPosts();
     return response;
+    return 'fodase';
   }
 
-  @Get('/global-last-posts')
-  async getLastPosts() {
-    const response = await this.feedService.getLastPosts();
-    return response;
-  }
-
+  // @Get('/global-last-posts')
+  // async getLastPosts() {
+  //   const response = await this.feedService.getLastPosts();
+  //   return response;
+  // }
 
   @Get('/:walletAddress')
   async getAllPostsByAddress(@Param('walletAddress') walletAddress: string) {
@@ -55,7 +55,6 @@ export class FeedController {
 
     return result;
   }
-
 
   @Get('/global/mongodb')
   async getPostsByMongo() {
