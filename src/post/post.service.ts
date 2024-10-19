@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import axios from 'axios';
 import base64 from 'base-64';
 import { AssetId } from 'src/enums/AssetId';
@@ -7,13 +7,52 @@ import { NotePrefix } from 'src/enums/NotePrefix';
 import { PostInterface } from 'src/interfaces/PostInterface';
 import { LikesService } from 'src/likes/likes.service';
 import { RepliesService } from 'src/replies/replies.service';
+import { PrismaService } from '../infra/clients/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PostService {
   constructor(
     private likesServices: LikesService,
     private repliesServices: RepliesService,
+    private prismaService: PrismaService,
   ) {}
+
+  // ------------- MONGODB --------------------
+
+  // Cria um post
+  public async createPost(data: Prisma.PostCreateInput) {
+    // Verifica se o transaction_id já existe
+    const existingPost = await this.prismaService.post.findUnique({
+      where: { transaction_id: data.transaction_id },
+    });
+
+    // Se o transaction_id já existir, lança uma exceção
+    if (existingPost) {
+      throw new BadRequestException('A post with this transaction_id already exists');
+    }
+
+    // Caso contrário, cria o post normalmente
+    return this.prismaService.post.create({ data });
+  }
+
+  // Busca um post por ID
+  public async getPostById(id: string) {
+    return this.prismaService.post.findUnique({ where: { id } });
+  }
+
+  // Atualiza um post
+  public async updatePost(id: string, data: Prisma.PostUpdateInput) {
+    return this.prismaService.post.update({
+      where: { id },
+      data,
+    });
+  }
+
+  // Deleta um post
+  async deletePost(id: string) {
+    return this.prismaService.post.delete({ where: { id } });
+  }
 
   private notePrefix: string = NotePrefix.WeCoopPost;
 
@@ -27,6 +66,7 @@ export class PostService {
     replies: [],
     status: null,
     assetId: 0,
+    isPersonalized: false,
   };
 
   private setGetPostsUrl(address: string) {
@@ -58,6 +98,7 @@ export class PostService {
       replies: [],
       status: 'accepted',
       assetId,
+      isPersonalized: false,
     };
 
     const likesUrl = `https://mainnet-idx.algonode.cloud/v2/accounts/DZ6ZKA6STPVTPCTGN2DO5J5NUYEETWOIB7XVPSJ4F3N2QZQTNS3Q7VIXCM/transactions?note-prefix=${btoa(

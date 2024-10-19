@@ -6,6 +6,7 @@ import { RepliesService } from 'src/replies/replies.service';
 import { UserService } from 'src/user/user.service';
 import { FeedController } from './feed.controller';
 import { FollowService } from 'src/follow/follow.service';
+import { PollsService } from 'src/polls/polls.service';
 
 @Module({
   controllers: [FeedController],
@@ -16,6 +17,7 @@ import { FollowService } from 'src/follow/follow.service';
     RepliesService,
     UserService,
     FollowService,
+    PollsService,
   ],
 })
 export class FeedModule {}

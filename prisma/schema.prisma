@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  transaction_id   String  @unique
+  creator_address  String
+  text             String
+  timestamp        Int
+  country          String
+  assetId          Int
+  replies          Reply[] @relation("PostReplies")
+  likes            Like[]  @relation("PostLikes")
+}
+
+
+model Reply {
+  id                 String @id @default(auto()) @map("_id") @db.ObjectId
+  transaction_id     String @unique
+  post_transaction_id String
+  creator_address    String
+  text               String
+  timestamp          Int
+  country            String
+  assetId            Int
+  post               Post?   @relation("PostReplies", fields: [post_transaction_id], references: [transaction_id])
+
+  @@index([post_transaction_id])
+}
+
+model Like {
+  id                 String @id @default(auto()) @map("_id") @db.ObjectId
+  transaction_id     String @unique
+  creator_address    String
+  post_transaction_id String
+  post               Post   @relation("PostLikes", fields: [post_transaction_id], references: [transaction_id])
+
+  @@index([post_transaction_id])
+}
+
+model Poll {
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  pollId           Int     @unique
+  creator_address  String
+  text             String
+  timestamp        Int
+  country          String
+  assetId          Int
+  depositedAmount  Int
+  totalVotes       Int
+  yesVotes         Int
+  expiry_timestamp Int
+  status           String
+  voters           Voter[]
+}
+
+model Voter {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  pollId       Int
+  voterAddress String
+  claimed      Boolean
+  poll         Poll   @relation(fields: [pollId], references: [pollId])
+  in_favor Boolean
+  deposited_amount Int
+
+  @@unique([pollId, voterAddress])
+  @@index([pollId])
+}
+
+
+

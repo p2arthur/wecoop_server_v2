@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import algosdk from 'algosdk';
 import axios from 'axios';
 import { usableAssetsList } from 'src/data/usableAssetList';
 import { AssetId } from 'src/enums/AssetId';
@@ -15,6 +16,12 @@ export class UserService {
     balance: {},
     followTargets: [],
   };
+
+  private algodClient = new algosdk.Algodv2(
+    process.env.ALGOD_TOKEN,
+    process.env.ALGOD_SERVER,
+    process.env.ALGOD_PORT,
+  );
   //----------------------------------------------------------------------------
   constructor(private followServices: FollowService) {}
 
@@ -60,11 +67,19 @@ export class UserService {
               `https://mainnet-idx.algonode.cloud/v2/accounts/${walletAddress}/assets?asset-id=${asset.assetId}&include-all=false`,
             );
 
+            const { params } = await this.algodClient
+              .getAssetByID(asset.assetId)
+              .do();
+
+            const assetDecimals = params.decimals;
+
             if (data.assets.length === 0 || !data.assets[0]) {
               userBalances[key] = 0;
             } else {
               const balance = parseFloat(
-                (data.assets[0].amount / 10 ** 6).toFixed(2),
+                String(
+                  (data.assets[0].amount / 10 ** assetDecimals).toFixed(2),
+                ),
               );
               userBalances[key] = balance;
             }
@@ -129,7 +144,7 @@ export class UserService {
 
       return userNfd;
     } catch (error) {
-      console.error('Error fetching NFD data:', error);
+      console.error('Error fetching NFD data:');
       return userNfd; // Return default NFD if error
     }
   }

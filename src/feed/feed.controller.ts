@@ -16,12 +16,11 @@ export class FeedController {
     return 'fodase';
   }
 
-  @Get('/global-last-posts')
-  async getLastPosts() {
-    const response = await this.feedService.getLastPosts();
-    return response;
-  }
-
+  // @Get('/global-last-posts')
+  // async getLastPosts() {
+  //   const response = await this.feedService.getLastPosts();
+  //   return response;
+  // }
 
   @Get('/:walletAddress')
   async getAllPostsByAddress(@Param('walletAddress') walletAddress: string) {
@@ -48,5 +47,23 @@ export class FeedController {
     const postsList = this.feedService.getFeedByAssetId(assetId);
 
     return postsList;
+  }
+
+  @Get('/sync-on-chain/mongodb')
+  async createNewPost() {
+    const result = await this.feedService.processAndSaveTransactions();
+
+    return result;
+  }
+
+  @Get('/global/mongodb')
+  async getPostsByMongo() {
+    const result = await this.feedService.getAllPostsFromMongo(1, 620);
+    return result;
+  }
+  @Get('/global/polls/mongodb')
+  async getPollsByMongo() {
+    const result = await this.feedService.getAllPollsFromMongo(1, 620);
+    return result;
   }
 }
