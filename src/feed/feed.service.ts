@@ -27,10 +27,16 @@ export class FeedService {
     private prismaService: PrismaService,
   ) {}
 
-  private setGetPostsUrl(address: string, assetId: number): string {
+  private setGetPostsUrl(
+    address: string,
+    assetId: number,
+    limit?: number,
+  ): string {
     return `https://mainnet-idx.algonode.cloud/v2/accounts/${address}/transactions?note-prefix=${base64.encode(
       this.notePrefix,
-    )}&tx-type=axfer&asset-id=${assetId}`;
+    )}&tx-type=axfer&asset-id=${assetId}${
+      isNumber(limit) ? `&limit=${limit}` : ''
+    }`;
   }
 
   private resetPostsList(): void {
@@ -193,7 +199,8 @@ export class FeedService {
 
     const [data, countResult] = await Promise.all([dataPromise, countPromise]);
 
-    const totalCount = (countResult[0] as { totalCount: number })?.totalCount || 0;
+    const totalCount =
+      (countResult[0] as { totalCount: number })?.totalCount || 0;
     const totalPages = Math.ceil(totalCount / pageSize);
 
     return {
@@ -203,8 +210,6 @@ export class FeedService {
       currentPage: page,
     };
   }
-
-
 
   private handleText(postText: string): string {
     let decodedText: string;
