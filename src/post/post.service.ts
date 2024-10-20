@@ -13,7 +13,6 @@ import { LikesService } from 'src/likes/likes.service';
 import { RepliesService } from 'src/replies/replies.service';
 import { PrismaService } from '../infra/clients/prisma.service';
 import { Prisma } from '@prisma/client';
-import { tweet } from 'wecoop_twitter_bot';
 
 @Injectable()
 export class PostService {

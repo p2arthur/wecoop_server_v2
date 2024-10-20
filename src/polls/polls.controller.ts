@@ -2,6 +2,8 @@ import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { PollsService } from './polls.service';
 import { PollInterface } from 'src/interfaces/PollInterface';
 import { Prisma } from '@prisma/client';
+import { writeFileSync } from 'fs';
+import { tweetWithImage } from 'wecoop_twitter_bot';
 
 @Controller('polls')
 export class PollsController {
@@ -47,5 +49,24 @@ export class PollsController {
     @Param('pollId') pollId: number,
   ) {
     return this.pollsServices.claimVoter(voterAddress, Number(pollId));
+  }
+
+  @Post('/uploadVoteCardImage/upload')
+  async uploadVoteCardImage(@Body() body: { image: string; pollId: number }) {
+    const { image, pollId } = body;
+
+    // Decode the base64 image
+    const base64Data = image.replace(/^data:image\/png;base64,/, '');
+
+    const message = await this.pollsServices.writePollTweetMessage(pollId);
+
+    // Save the image to the server
+    const imagePath = `./tmp/voteCard_${pollId}.png`;
+    writeFileSync(imagePath, base64Data, 'base64');
+
+    // Tweet the image
+    await tweetWithImage(message, imagePath);
+
+    return { success: true };
   }
 }

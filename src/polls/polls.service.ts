@@ -4,7 +4,6 @@ import { PrismaService } from 'src/infra/clients/prisma.service';
 import { PollInterface, VoterInterface } from 'src/interfaces/PollInterface';
 import { getRoundTimestamp } from 'src/utils/getRoundTimestamp';
 import { Prisma } from '@prisma/client';
-import { tweet } from 'wecoop_twitter_bot';
 
 @Injectable()
 export class PollsService {
@@ -306,8 +305,14 @@ export class PollsService {
       },
     });
 
-    tweet('New wecoop post');
-
     console.error('result of creating poll on db', result);
+  }
+
+  async writePollTweetMessage(pollId: number) {
+    const poll = await this.prismaServices.poll.findFirst({
+      where: { pollId: pollId },
+    });
+
+    return `${poll.creator_address} just created a new wecoop poll with a prize of ${poll.depositedAmount} powered by $ALGO`;
   }
 }
