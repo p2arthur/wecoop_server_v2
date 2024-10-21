@@ -52,13 +52,25 @@ export class PollsController {
   }
 
   @Post('/uploadVoteCardImage/upload')
-  async uploadVoteCardImage(@Body() body: { image: string; pollId: number }) {
-    const { image, pollId } = body;
+  async uploadVoteCardImage(
+    @Body()
+    body: {
+      image: string;
+      pollId: number;
+      nfd: string;
+      amount: number;
+    },
+  ) {
+    const { image, pollId, nfd, amount } = body;
 
     // Decode the base64 image
     const base64Data = image.replace(/^data:image\/png;base64,/, '');
 
-    const message = await this.pollsServices.writePollTweetMessage(pollId);
+    const message = await this.pollsServices.writePollTweetMessage(
+      pollId,
+      nfd,
+      amount,
+    );
 
     // Save the image to the server
     const imagePath = `./tmp/voteCard_${pollId}.png`;
