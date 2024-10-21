@@ -4,6 +4,8 @@ import { PrismaService } from 'src/infra/clients/prisma.service';
 import { PollInterface, VoterInterface } from 'src/interfaces/PollInterface';
 import { getRoundTimestamp } from 'src/utils/getRoundTimestamp';
 import { Prisma } from '@prisma/client';
+import { usableAssetsList } from 'src/data/usableAssetList';
+import { ellipseAddress } from 'src/utils/ellipseAddress';
 
 @Injectable()
 export class PollsService {
@@ -306,5 +308,23 @@ export class PollsService {
     });
 
     console.error('result of creating poll on db', result);
+  }
+
+  async writePollTweetMessage(pollId: number, nfd: string, amount: number) {
+    const poll = await this.prismaServices.poll.findFirst({
+      where: { pollId: pollId },
+    });
+
+    return `🚀 ${
+      nfd === '' ? ellipseAddress(poll.creator_address) : nfd
+    } just launched a new WeCoop poll! 
+    
+Prize: ${amount} $${usableAssetsList
+      .find((usableAsset) => usableAsset.assetId === poll.assetId)
+      .name.toUpperCase()} 💰
+
+🗳️ Join the vote now at wecoop.xyz
+
+Powered by $ALGO`;
   }
 }

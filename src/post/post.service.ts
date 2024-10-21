@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import axios from 'axios';
 import base64 from 'base-64';
 import { AssetId } from 'src/enums/AssetId';
@@ -29,7 +33,9 @@ export class PostService {
 
     // Se o transaction_id já existir, lança uma exceção
     if (existingPost) {
-      throw new BadRequestException('A post with this transaction_id already exists');
+      throw new BadRequestException(
+        'A post with this transaction_id already exists',
+      );
     }
 
     // Caso contrário, cria o post normalmente
