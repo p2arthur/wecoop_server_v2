@@ -290,6 +290,12 @@ export class PollsService {
     });
   }
 
+  async getPollById(pollId: number) {
+    return this.prismaServices.poll.findFirst({
+      where: { pollId },
+    });
+  }
+
   async createPoll(poll: PollInterface) {
     const result = await this.prismaServices.poll.create({
       data: {

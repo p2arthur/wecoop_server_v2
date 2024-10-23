@@ -2,8 +2,10 @@ import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { PollsService } from './polls.service';
 import { PollInterface } from 'src/interfaces/PollInterface';
 import { Prisma } from '@prisma/client';
-import { writeFileSync } from 'fs';
+import { writeFileSync, unlinkSync } from 'fs';
 import { tweetWithImage } from 'wecoop_twitter_bot';
+import {sendPollToDiscord} from '../utils/postOnDiscord'
+import axios from 'axios';
 
 @Controller('polls')
 export class PollsController {
@@ -27,6 +29,11 @@ export class PollsController {
     }
   }
 
+  @Get('/poll/:pollId')
+  async getPollById(@Param('pollId') pollId: number) {
+    return this.pollsServices.getPollById(pollId);
+  }
+
   @Post('/vote')
   async voteOnPoll(@Body() voter: Prisma.VoterUncheckedCreateInput) {
     try {
@@ -36,7 +43,11 @@ export class PollsController {
       console.error('Error casting vote:', error);
       return { message: 'Failed to cast vote', error: error.message };
     }
+
+
   }
+
+
 
   @Get('voter/:voterAddress')
   async getPollsByVoterAddress(@Param('voterAddress') voterAddress: string) {
@@ -72,12 +83,15 @@ export class PollsController {
       amount,
     );
 
-    // Save the image to the server
     const imagePath = `./tmp/voteCard_${pollId}.png`;
     writeFileSync(imagePath, base64Data, 'base64');
 
-    // Tweet the image
     await tweetWithImage(message, imagePath);
+    await sendPollToDiscord(message, imagePath);
+
+
+    unlinkSync(imagePath)
+
 
     return { success: true };
   }
