@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import FormData = require('form-data'); // Importação correta do FormData
 
 export async function sendPollToDiscord(text: string, localImagePath: string) {
-  const webhookUrl = "https://discord.com/api/webhooks/1298479608953438302/Yu4-LUQvajB8Ivo5GOaJr6TdAyWAWwEJw-yeoNs0f293wyxIGCRr_XXycwsl2Pcgnz2i";
+  const webhookUrl = "https://discord.com/api/webhooks/1298544417346682912/tEyf4M_VkgT8qKv5bbdB9y7Sad1wcqRv_DuzhQlDvRiaSYP0pFKybZbuZmx8VUGemCoR";
 
   // Certifique-se de que o caminho da imagem é válido e o arquivo existe
   if (!fs.existsSync(localImagePath)) {
