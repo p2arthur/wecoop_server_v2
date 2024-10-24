@@ -10,10 +10,13 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { PollsModule } from './polls/polls.module';
 import { ConfigModule } from '@nestjs/config';
 import { DataModule } from './infra/modules/data.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { PollExpiryJob } from './jobs/poll.jobs';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     UserModule,
     PostModule,
     LikesModule,
@@ -25,5 +28,6 @@ import { DataModule } from './infra/modules/data.module';
     PollsModule,
     DataModule,
   ],
+  providers: [PollExpiryJob],
 })
 export class AppModule {}

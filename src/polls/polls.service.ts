@@ -297,7 +297,7 @@ export class PollsService {
   }
 
   async createPoll(poll: PollInterface) {
-    const result = await this.prismaServices.poll.create({
+   return this.prismaServices.poll.create({
       data: {
         pollId: poll.pollId,
         creator_address: poll.creator_address,
@@ -313,7 +313,6 @@ export class PollsService {
       },
     });
 
-    console.error('result of creating poll on db', result);
   }
 
   async writePollTweetMessage(pollId: number, nfd: string, amount: number) {
