@@ -6,10 +6,14 @@ import { writeFileSync, unlinkSync } from 'fs';
 import { tweetWithImage } from 'wecoop_twitter_bot';
 import {sendPollToDiscord} from '../utils/postOnDiscord'
 import axios from 'axios';
+import { PollExpiryJob } from '../jobs/poll.jobs';
 
 @Controller('polls')
 export class PollsController {
-  constructor(private pollsServices: PollsService) {}
+  constructor(
+    private pollsServices: PollsService,
+    private pollExpiryJob: PollExpiryJob,
+  ) {}
 
   @Get('/all-polls')
   async getAllPolls() {
@@ -22,6 +26,7 @@ export class PollsController {
   async createNewPoll(@Body() poll: PollInterface) {
     try {
       const result = await this.pollsServices.createPoll(poll);
+      this.pollExpiryJob.schedulePollExpiry(result);
       return { message: 'Poll created successfully', poll: result };
     } catch (error) {
       console.error('Error creating poll:', error);

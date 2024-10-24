@@ -86,7 +86,6 @@ export class UserService {
           } catch (error) {
             console.error(
               `Error fetching balance for asset ${asset.assetId}:`,
-              error,
             );
             userBalances[key] = 0;
           }
