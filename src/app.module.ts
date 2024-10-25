@@ -12,6 +12,8 @@ import { ConfigModule } from '@nestjs/config';
 import { DataModule } from './infra/modules/data.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PollExpiryJob } from './jobs/poll.jobs';
+import { NotificationModule } from './notification/notification.module';
+import { NotificationService } from './notification/notification.service';
 
 @Module({
   imports: [
@@ -27,7 +29,8 @@ import { PollExpiryJob } from './jobs/poll.jobs';
     LeaderboardModule,
     PollsModule,
     DataModule,
+    NotificationModule,
   ],
-  providers: [PollExpiryJob],
+  providers: [PollExpiryJob, NotificationService],
 })
 export class AppModule {}
