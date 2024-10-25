@@ -21,9 +21,14 @@ export class NotificationController {
     return this.notificationService.getNotificationsByWalletAddress(walletAddress);
   }
 
-  @Patch('mark-read/:walletAddress')
-  async markAsRead(@Param('walletAddress') walletAddress: string) {
-    return this.notificationService.markAsRead(walletAddress);
+  @Patch('mark-read/:id')
+  async markAsRead(@Param('id') id: string) {
+    return this.notificationService.markAsRead(id);
+  }
+
+  @Patch('mark-read/:walletAddress/:pollId')
+  async markAsReadByPoll(@Param('walletAddress') walletAddress: string, @Param('pollId') pollId: number) {
+    return this.notificationService.markAsReadByPoll(walletAddress, pollId);
   }
 
   @Delete(':id')

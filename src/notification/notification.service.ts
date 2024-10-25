@@ -30,9 +30,16 @@ export class NotificationService {
   }
 
   // Marcar notificações como lidas por wallet_address
-  async markAsRead(walletAddress: string) {
+  async markAsRead(id: string) {
     return this.prisma.notification.updateMany({
-      where: { wallet_address: walletAddress },
+      where: { id: id },
+      data: { read: true },
+    });
+  }
+
+  async markAsReadByPoll(walletAddress: string, pollId: number) {
+    return this.prisma.notification.updateMany({
+      where: { wallet_address: walletAddress, pollId: pollId },
       data: { read: true },
     });
   }
