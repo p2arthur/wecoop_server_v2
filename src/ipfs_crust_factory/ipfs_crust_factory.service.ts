@@ -12,19 +12,13 @@ export class IpfsCrustFactoryService {
     );
 
     const response = await fetch(
-      'https://pbs.twimg.com/profile_images/1833586754563026944/R41iDqhH_400x400.jpg',
+      'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjZieHR0d2xnOXBtcHprMjd3c2doMXdtYmdrYmsxaHJpbWdtMG5zZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/tHIRLHtNwxpjIFqPdV/giphy.webp',
     );
     const blob = await response.blob();
     const file = new File([blob], 'foto_minha.png');
 
     const { size, cid } = await uploadToIpfs(file);
 
-    console.log('cid before finishing uplad', cid, size);
-
-    const upload = doCrustIpfs('mainnet', algodClient, file, cid, size);
-
-    console.log('result', upload);
-
-    return cid;
+    return { cid, size };
   }
 }

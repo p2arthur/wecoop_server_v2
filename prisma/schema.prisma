@@ -36,6 +36,7 @@ model Reply {
   country            String
   assetId            Int
   post               Post?   @relation("PostReplies", fields: [post_transaction_id], references: [transaction_id])
+  // file_post           FilePost?   @relation("PostReplies", fields: [post_transaction_id], references: [transaction_id])
 
   @@index([post_transaction_id])
 }
@@ -46,6 +47,7 @@ model Like {
   creator_address    String
   post_transaction_id String
   post               Post   @relation("PostLikes", fields: [post_transaction_id], references: [transaction_id])
+  // file_post               FilePost   @relation("PostLikes", fields: [post_transaction_id], references: [transaction_id])
 
   @@index([post_transaction_id])
 }
@@ -90,3 +92,18 @@ model Notification {
 
 
 
+model FilePost {
+  id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  transaction_id   String  @unique
+  creator_address  String
+  text             String
+  timestamp        Int
+  country          String
+  assetId          Int
+  file_1_cid        String
+  file_1_format     String
+  file_2_cid        String?
+  file_2_format        String?
+  // replies          Reply[] @relation("PostReplies")
+  // likes            Like[]  @relation("PostLikes")
+}

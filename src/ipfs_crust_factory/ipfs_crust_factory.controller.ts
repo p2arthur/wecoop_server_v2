@@ -7,6 +7,7 @@ export class IpfsCrustFactoryController {
 
   @Post('/ipfs_factory')
   async makeIpfs() {
-    this.ipfsCrustServices.sendToIpfs();
+    const { cid, size } = await this.ipfsCrustServices.sendToIpfs();
+    return { cid, size };
   }
 }

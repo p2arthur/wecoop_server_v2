@@ -1,7 +1,7 @@
 import algosdk from 'algosdk';
 import axios from 'axios';
 import * as algokit from '@algorandfoundation/algokit-utils';
-import nacl from 'tweetnacl';
+import * as nacl from 'tweetnacl';
 import { StorageOrderClient } from './onchain/clients/StorageOrderClient';
 import { SendTransactionFrom } from '@algorandfoundation/algokit-utils/types/transaction';
 
@@ -122,8 +122,9 @@ export async function doCrustIpfs(
 ) {
   algokit.Config.configure({ populateAppCallResources: true });
 
-  const senderAddress = process.env
-    .WECOOP_CRUST_FACTORY_ADDRESS as unknown as SendTransactionFrom;
+  const senderAddress: SendTransactionFrom = {
+    addr: process.env.WECOOP_CRUST_FACTORY_ADDRESS,
+  } as SendTransactionFrom;
 
   const appClient = new StorageOrderClient(
     {

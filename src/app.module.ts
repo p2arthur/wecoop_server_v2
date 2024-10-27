@@ -15,6 +15,7 @@ import { PollExpiryJob } from './jobs/poll.jobs';
 import { IpfsCrustFactoryModule } from './ipfs_crust_factory/ipfs_crust_factory.module';
 import { NotificationModule } from './notification/notification.module';
 import { NotificationService } from './notification/notification.service';
+import { FilePostModule } from './file_post/file_post.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { NotificationService } from './notification/notification.service';
     DataModule,
     IpfsCrustFactoryModule,
     NotificationModule,
+    FilePostModule,
   ],
   providers: [PollExpiryJob, NotificationService],
 })
