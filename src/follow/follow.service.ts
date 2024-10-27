@@ -94,7 +94,7 @@ export class FollowService {
       const mappedFollowers = followersArray.map((follow) => follow.target);
       return mappedFollowers;
     } catch (error) {
-      throw new Error('Error getting follow targets...');
+      console.log('Error getting follow targets...');
     }
   }
 

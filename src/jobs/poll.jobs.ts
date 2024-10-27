@@ -5,6 +5,8 @@ import * as process from 'process';
 import * as schedule from 'node-schedule';
 import { usableAssetsList } from '../data/usableAssetList';
 import { getAssetDecimals } from '../utils/getAssetDecimals';
+import { NotificationService } from '../notification/notification.service';
+import { Cron } from '@nestjs/schedule';
 
 interface Poll {
   pollId: number,
@@ -22,11 +24,14 @@ interface Poll {
 
 
 @Injectable()
-export class PollExpiryJob implements OnModuleInit {
-  constructor(private readonly prisma: PrismaService) {}
+export class PollExpiryJob {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService
+  ) {}
 
-  async onModuleInit(): Promise<void> {
-    console.log('Inicializando agendamentos de polls');
+  @Cron('0 11 * * *', {timeZone: 'America/Sao_Paulo'}) // Roda todos dia 11 horas da manha
+  async handleExpiredPolls() {
     const upcomingPolls = await this.prisma.poll.findMany({
       where: {
         expiry_timestamp: {
@@ -36,21 +41,11 @@ export class PollExpiryJob implements OnModuleInit {
     });
 
     for (const poll of upcomingPolls) {
-      this.schedulePollExpiry(poll);
+      await this.handleExpiredPoll(poll);
     }
   }
 
 
-
-  public schedulePollExpiry(poll: Poll): void {
-    const expiryDate = new Date(poll.expiry_timestamp * 1000); // Converter para milissegundos
-    console.log(`Agendando job para a poll ${poll.pollId} para ${expiryDate}`);
-
-    schedule.scheduleJob(expiryDate, async () => {
-      console.log(`Processando poll expirada: ${poll.pollId}`);
-      await this.handleExpiredPoll(poll);
-    });
-  }
 
   private async handleExpiredPoll(poll: Poll): Promise<void> {
     const voters = await this.prisma.voter.findMany({
@@ -65,12 +60,19 @@ export class PollExpiryJob implements OnModuleInit {
     const prizePerVoter = Math.floor(poll.depositedAmount / voters.length);
 
     for (const voter of voters) {
-      await this.sendTransaction(voter.voterAddress, prizePerVoter, poll.assetId);
+      await this.sendTransaction(voter.voterAddress, prizePerVoter, poll.assetId, poll.pollId);
     }
   }
 
-  private async sendTransaction(voterAddress: string, amountPrizePoll: number, assetId: number) {
+  private async sendTransaction(voterAddress: string, amountPrizePoll: number, assetId: number, pollId: number) {
     try {
+      const existingNotification = await this.notificationService.getNotificationsByWalletAndPoll(voterAddress, pollId);
+
+      if (existingNotification.length > 0) {
+        console.log(`Notificação já existe para o endereço ${voterAddress} na poll ${pollId}.`);
+        return;
+      }
+
       const algodClient = new algosdk.Algodv2(
         process.env.ALGOD_TOKEN,
         process.env.ALGOD_SERVER,
@@ -85,19 +87,17 @@ export class PollExpiryJob implements OnModuleInit {
 
       const note = `🎉✨ The WeCoop Poll You Voted On Has Expired! ✨🚩\n
 💸 It's Time to Claim Your Prize: ${formattedAumount} | ${assetInfo.name} 🏆💰\n
-🌟 Don't Miss Out! Head over to wecoop.xyz and claim your rewards now! 🏃‍♂️💨💸`
+🌟 Don't Miss Out! Head over to wecoop and claim your rewards now! 🏃‍♂️💨💸`
 
       const sender = process.env.WECOOP_NOTIFICATION_WALLET_ADDRESS;
       const receiver = voterAddress;
-      const params = await algodClient.getTransactionParams().do();
-
       const amountSendTransaction = 1000; // Valor minimo
 
       const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
         sender: sender,
         receiver: receiver,
         amount: amountSendTransaction,
-        suggestedParams: params,
+        suggestedParams: await algodClient.getTransactionParams().do(),
         note: new Uint8Array(Buffer.from(note)),
       });
 
@@ -108,10 +108,20 @@ export class PollExpiryJob implements OnModuleInit {
 
       await algodClient.sendRawTransaction(signedTxn.blob).do();
       console.log(`Transação enviada: ${txId}`);
-
       await algosdk.waitForConfirmation(algodClient, txId, 10);
+
+
+      await this.notificationService.createNotification({
+        text: note,
+        pollId: pollId,
+        wallet_address: voterAddress,
+        transaction_id: txId,
+        read: false,
+      })
+
+
     } catch (error) {
-      console.error('Erro ao enviar transação ---------', voterAddress);
+      console.error('Erro ao enviar transação ---------', error);
     }
   }
 

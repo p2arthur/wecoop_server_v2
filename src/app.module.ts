@@ -13,6 +13,8 @@ import { DataModule } from './infra/modules/data.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PollExpiryJob } from './jobs/poll.jobs';
 import { IpfsCrustFactoryModule } from './ipfs_crust_factory/ipfs_crust_factory.module';
+import { NotificationModule } from './notification/notification.module';
+import { NotificationService } from './notification/notification.service';
 
 @Module({
   imports: [
@@ -29,7 +31,8 @@ import { IpfsCrustFactoryModule } from './ipfs_crust_factory/ipfs_crust_factory.
     PollsModule,
     DataModule,
     IpfsCrustFactoryModule,
+    NotificationModule,
   ],
-  providers: [PollExpiryJob],
+  providers: [PollExpiryJob, NotificationService],
 })
 export class AppModule {}
