@@ -12,6 +12,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DataModule } from './infra/modules/data.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PollExpiryJob } from './jobs/poll.jobs';
+import { IpfsCrustFactoryModule } from './ipfs_crust_factory/ipfs_crust_factory.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PollExpiryJob } from './jobs/poll.jobs';
     LeaderboardModule,
     PollsModule,
     DataModule,
+    IpfsCrustFactoryModule,
   ],
   providers: [PollExpiryJob],
 })
