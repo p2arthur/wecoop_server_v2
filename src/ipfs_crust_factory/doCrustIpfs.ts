@@ -21,22 +21,19 @@ const getAuthHeader = async (account: SendTransactionFrom) => {
   return Buffer.from(authStr).toString('base64');
 };
 
-export const uploadToIpfs = async (file: File) => {
+export const uploadToIpfs = async (file: any) => {
   const account = process.env
     .WECOOP_CRUST_FACTORY_ADDRESS as unknown as SendTransactionFrom;
   const headers = { Authorization: `Basic ${await getAuthHeader(account)}` };
 
   const apiEndpoint = 'https://gw-seattle.crustcloud.io:443/api/v0/add';
 
-  // // Create a Blob object containing file data (for example, some text)
-  // const fileContent = 'This is a dynamically generated file.'
-  // const blob = new Blob([fileContent], { type: 'text/plain' })
+  console.log('file data', file);
 
-  // // Convert Blob to File
-  // const file = new File([blob], 'dynamic-file.txt', { type: 'text/plain' })
+  const blob = new Blob([file.buffer]);
 
   const formData = new FormData();
-  formData.append('file', file, file.name);
+  formData.append('file', blob, file.name);
 
   try {
     const { data } = await axios.post(apiEndpoint, formData, {
@@ -45,6 +42,8 @@ export const uploadToIpfs = async (file: File) => {
 
     const json: { Hash: string; Size: number } = data;
     return { cid: json.Hash, size: Number(json.Size) };
+
+    console.log('cid');
   } catch (error) {
     console.error('Failed to upload to IPFS:', error);
     throw error;

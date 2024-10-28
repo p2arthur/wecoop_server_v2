@@ -94,6 +94,18 @@ export class FeedService {
           },
         },
         {
+          $unionWith: {
+            coll: 'FilePost',
+            pipeline: [
+              {
+                $addFields: {
+                  type: 'filepost',
+                },
+              },
+            ],
+          },
+        },
+        {
           $sort: {
             timestamp: -1,
           },
