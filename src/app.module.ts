@@ -17,6 +17,7 @@ import { NotificationModule } from './notification/notification.module';
 import { NotificationService } from './notification/notification.service';
 import { FilePostModule } from './file_post/file_post.module';
 import { FileModule } from './file/file.module';
+import { OrangeMinerModule } from './orange_miner/orange_miner.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { FileModule } from './file/file.module';
     NotificationModule,
     FilePostModule,
     FileModule,
+    OrangeMinerModule,
   ],
   providers: [PollExpiryJob, NotificationService],
 })

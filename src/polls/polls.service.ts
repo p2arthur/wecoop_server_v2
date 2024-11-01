@@ -297,7 +297,7 @@ export class PollsService {
   }
 
   async createPoll(poll: PollInterface) {
-   return this.prismaServices.poll.create({
+    return this.prismaServices.poll.create({
       data: {
         pollId: poll.pollId,
         creator_address: poll.creator_address,
@@ -312,7 +312,6 @@ export class PollsService {
         status: 'accepted',
       },
     });
-
   }
 
   async writePollTweetMessage(pollId: number, nfd: string, amount: number) {
