@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import algosdk from 'algosdk';
+import * as algokit from '@algorandfoundation/algokit-utils';
 import { PrismaService } from 'src/infra/clients/prisma.service';
 
 @Injectable()
@@ -16,8 +17,6 @@ export class FilePostService {
   );
 
   async createFilePost(data: Prisma.FilePostCreateInput) {
-    console.log('creating file post to db');
-
     await this.prismaService.filePost.create({ data: data });
     console.log('created file post');
   }

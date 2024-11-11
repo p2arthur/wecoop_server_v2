@@ -94,6 +94,7 @@ model Notification {
 
 model FilePost {
   id               String  @id @default(auto()) @map("_id") @db.ObjectId
+  filepost_id Int
   creator_address  String
   text             String
   timestamp        Int
