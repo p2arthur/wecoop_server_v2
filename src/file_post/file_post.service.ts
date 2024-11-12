@@ -8,16 +8,16 @@ import { PrismaService } from 'src/infra/clients/prisma.service';
 export class FilePostService {
   constructor(private prismaService: PrismaService) {}
 
-  private filePostAppId = process.env.WECOOP_FILEPOST_APP_ID;
-
-  private algodClient = new algosdk.Algodv2(
-    process.env.ALGOD_TOKEN,
-    process.env.ALGOD_SERVER,
-    process.env.ALGOD_PORT,
-  );
-
   async createFilePost(data: Prisma.FilePostCreateInput) {
     await this.prismaService.filePost.create({ data: data });
     console.log('created file post');
+  }
+
+  async likeFilePost(data: Prisma.FilePostLikeUncheckedCreateInput) {
+    try {
+      await this.prismaService.filePostLike.create({ data: data });
+    } catch (error) {
+      console.error('error ', error);
+    }
   }
 }

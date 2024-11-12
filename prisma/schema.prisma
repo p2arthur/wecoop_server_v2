@@ -91,19 +91,27 @@ model Notification {
 }
 
 
-
 model FilePost {
   id               String  @id @default(auto()) @map("_id") @db.ObjectId
-  filepost_id Int
+  filepost_id      Int @unique
   creator_address  String
   text             String
   timestamp        Int
   country          String
   assetId          Int
-  file_1_cid        String
-  file_1_format     String
-  file_2_cid        String?
-  file_2_format        String?
-  // replies          Reply[] @relation("PostReplies")
-  // likes            Like[]  @relation("PostLikes")
+  file_1_cid       String
+  file_1_format    String
+  file_2_cid       String?
+  file_2_format    String?
+  likes            FilePostLike[] @relation("FilePostLikes")
+}
+
+model FilePostLike {
+  id               String @id @default(auto()) @map("_id") @db.ObjectId
+  creator_address  String
+  filepost_id      Int
+  file_post        FilePost @relation("FilePostLikes", fields: [filepost_id], references: [filepost_id])
+
+  @@unique([filepost_id, creator_address])
+  @@index([filepost_id])
 }

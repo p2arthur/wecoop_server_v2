@@ -98,6 +98,14 @@ export class FeedService {
             coll: 'FilePost',
             pipeline: [
               {
+                $lookup: {
+                  from: 'FilePostLike',
+                  localField: 'filepost_id',
+                  foreignField: 'filepost_id',
+                  as: 'likes',
+                },
+              },
+              {
                 $addFields: {
                   type: 'filepost',
                 },
