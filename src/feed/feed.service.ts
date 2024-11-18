@@ -94,6 +94,34 @@ export class FeedService {
           },
         },
         {
+          $unionWith: {
+            coll: 'FilePost',
+            pipeline: [
+              {
+                $lookup: {
+                  from: 'FilePostLike',
+                  localField: 'filepost_id',
+                  foreignField: 'filepost_id',
+                  as: 'likes',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'FilePostReply',
+                  localField: 'filepost_id',
+                  foreignField: 'filepost_id',
+                  as: 'replies',
+                },
+              },
+              {
+                $addFields: {
+                  type: 'filepost',
+                },
+              },
+            ],
+          },
+        },
+        {
           $sort: {
             timestamp: -1,
           },
@@ -457,8 +485,6 @@ export class FeedService {
 
     this.pollsList = allPolls.sort((a, b) => b.timestamp - a.timestamp);
 
-    console.log(allPolls, 'allPols');
-
     return [...this.postsList, ...this.pollsList].sort(
       (b, a) => a.timestamp - b.timestamp,
     );
@@ -521,8 +547,6 @@ export class FeedService {
   public async getFeedByAssetId(assetId: number) {
     this.resetPostsList();
 
-    console.log('asset id', assetId);
-
     const postsMadeWithAssetId = await this.prismaService.post.findMany({
       where: { assetId: Number(assetId) },
       select: {
@@ -534,8 +558,6 @@ export class FeedService {
         assetId: true,
       },
     });
-
-    console.log('posts by asset id', postsMadeWithAssetId);
   }
 
   public async getAllPostsByAddress(walletAddress: string) {

@@ -2,8 +2,6 @@ import { clientWithUserAuth } from './twitterClient';
 
 export const tweetWithImage = async (message: string, imagePath: string) => {
   try {
-    console.log('Making tweet with image', message);
-
     // Upload the image to Twitter
     const mediaId = await clientWithUserAuth.v1.uploadMedia(imagePath);
 

@@ -250,8 +250,6 @@ export class PollsService {
   }
 
   async createVoter(data: Prisma.VoterUncheckedCreateInput) {
-    console.log('vote data #$%#&*W#%$', data);
-
     const pollId = data.pollId;
     const result = await this.prismaServices.$transaction([
       this.prismaServices.poll.update({
@@ -272,8 +270,6 @@ export class PollsService {
         data,
       }),
     ]);
-
-    console.log('Updated poll after vote:', result);
 
     return this.prismaServices.voter.create({
       data,
@@ -297,7 +293,7 @@ export class PollsService {
   }
 
   async createPoll(poll: PollInterface) {
-   return this.prismaServices.poll.create({
+    return this.prismaServices.poll.create({
       data: {
         pollId: poll.pollId,
         creator_address: poll.creator_address,
@@ -312,7 +308,6 @@ export class PollsService {
         status: 'accepted',
       },
     });
-
   }
 
   async writePollTweetMessage(pollId: number, nfd: string, amount: number) {

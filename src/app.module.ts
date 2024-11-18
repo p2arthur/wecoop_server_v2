@@ -12,8 +12,12 @@ import { ConfigModule } from '@nestjs/config';
 import { DataModule } from './infra/modules/data.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PollExpiryJob } from './jobs/poll.jobs';
+import { IpfsCrustFactoryModule } from './ipfs_crust_factory/ipfs_crust_factory.module';
 import { NotificationModule } from './notification/notification.module';
 import { NotificationService } from './notification/notification.service';
+import { FilePostModule } from './file_post/file_post.module';
+import { FileModule } from './file/file.module';
+import { OrangeMinerModule } from './orange_miner/orange_miner.module';
 
 @Module({
   imports: [
@@ -29,7 +33,11 @@ import { NotificationService } from './notification/notification.service';
     LeaderboardModule,
     PollsModule,
     DataModule,
+    IpfsCrustFactoryModule,
     NotificationModule,
+    FilePostModule,
+    FileModule,
+    OrangeMinerModule,
   ],
   providers: [PollExpiryJob, NotificationService],
 })

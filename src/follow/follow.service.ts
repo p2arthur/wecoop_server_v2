@@ -93,9 +93,7 @@ export class FollowService {
       const followersArray: Target[] = Object.values(filteredFollows);
       const mappedFollowers = followersArray.map((follow) => follow.target);
       return mappedFollowers;
-    } catch (error) {
-      console.log('Error getting follow targets...');
-    }
+    } catch (error) {}
   }
 
   public async getUnfollowTargetsByAddress(walletAddress: string) {
