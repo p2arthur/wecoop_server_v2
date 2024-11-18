@@ -14,7 +14,5 @@ export class FileController {
     if (!file) {
       throw new Error('No file uploaded ');
     }
-
-    console.log('file uploaded', file);
   }
 }

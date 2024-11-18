@@ -122,7 +122,7 @@ export class PollExpiryJob {
       const txId = txn.txID().toString();
 
       await algodClient.sendRawTransaction(signedTxn.blob).do();
-      console.log(`Transação enviada: ${txId}`);
+
       await algosdk.waitForConfirmation(algodClient, txId, 10);
 
       await this.notificationService.createNotification({

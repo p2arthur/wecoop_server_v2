@@ -19,14 +19,14 @@ export class OrangeMinerService {
     'TGIPEOKUFC5JFTPFMXGSZWOGOFA7THFZXUTRLQEOH3RD3LGI6QEEWJNML4';
 
   // async onModuleInit() {
-  //   console.log('Starting orange miner');
-  //   console.log('Getting node stats');
+  //
+  //
   //   await this.checkNodeConnection();
 
-  //   console.log('Getting app data');
+  //
   //   this.getAppData();
 
-  //   console.log('getting miner data');
+  //
   //   await this.getMinerData('mainnet');
   // }
 
@@ -57,7 +57,6 @@ export class OrangeMinerService {
 
   private async checkNodeConnection() {
     const nodeStats = await this.algodClient.status().do();
-    console.log('node status', nodeStats);
   }
 
   private async getAppData() {
@@ -86,10 +85,6 @@ export class OrangeMinerService {
       ),
       startTimestamp: this.getStateNumber(globalState, 'start_timestamp'),
     };
-
-    console.log('app data', appData);
-
-    console.log('result of app data', globalState);
   }
 
   private find<T>(array: T[], condition: (item: T) => boolean): T | null {
@@ -98,8 +93,6 @@ export class OrangeMinerService {
 
   private findMinerState(accountInfo: any, appId: number): any[] | null {
     const localState = accountInfo['apps-local-state'];
-
-    console.log('app local state', localState);
 
     if (localState) {
       const app = this.find(
@@ -121,13 +114,11 @@ export class OrangeMinerService {
         ),
       )
       .do();
-    console.log('miner', minerInfo);
 
     const depositInfo = await this.algodClient
       .accountInformation(this.depositAddress)
       .do();
 
-    console.log('');
     const localState = this.findMinerState(
       depositInfo,
       Number(this.orangeAppId),

@@ -8,7 +8,6 @@ import { SendTransactionFrom } from '@algorandfoundation/algokit-utils/types/tra
 const getAuthHeader = async (account: SendTransactionFrom) => {
   const sk = algosdk.seedFromMnemonic(process.env.WECOOP_CRUST_FACTORY_SECRET);
 
-  console.log('sk', sk);
   const addr = process.env.WECOOP_CRUST_FACTORY_ADDRESS;
   const sk32 = sk.slice(0, 32);
   const signingKey = nacl.sign.keyPair.fromSeed(sk32);
@@ -28,8 +27,6 @@ export const uploadToIpfs = async (file: any) => {
 
   const apiEndpoint = 'https://gw-seattle.crustcloud.io:443/api/v0/add';
 
-  console.log('file data', file);
-
   const blob = new Blob([file.buffer]);
 
   const formData = new FormData();
@@ -42,8 +39,6 @@ export const uploadToIpfs = async (file: any) => {
 
     const json: { Hash: string; Size: number } = data;
     return { cid: json.Hash, size: Number(json.Size) };
-
-    console.log('cid');
   } catch (error) {
     console.error('Failed to upload to IPFS:', error);
     throw error;
@@ -135,17 +130,9 @@ export async function doCrustIpfs(
   );
 
   try {
-    console.log('Uploading to IPFS...');
-
-    console.log(`Uploaded to IPFS. CID: ${cid}, Size: ${size} bytes`);
-
-    console.log('Getting price...');
     const price = await getPrice(algod, appClient, size);
-    console.log(`Price for storage: ${price} microAlgos`);
 
-    console.log('Placing order...');
     await placeOrder(algod, appClient, cid, size, price, false);
-    console.log('Order placed successfully.');
   } catch (error) {
     console.error('An error occurred:', error);
   }

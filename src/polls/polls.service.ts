@@ -250,8 +250,6 @@ export class PollsService {
   }
 
   async createVoter(data: Prisma.VoterUncheckedCreateInput) {
-    console.log('vote data #$%#&*W#%$', data);
-
     const pollId = data.pollId;
     const result = await this.prismaServices.$transaction([
       this.prismaServices.poll.update({
@@ -272,8 +270,6 @@ export class PollsService {
         data,
       }),
     ]);
-
-    console.log('Updated poll after vote:', result);
 
     return this.prismaServices.voter.create({
       data,

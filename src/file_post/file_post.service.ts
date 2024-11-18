@@ -10,7 +10,6 @@ export class FilePostService {
 
   async createFilePost(data: Prisma.FilePostCreateInput) {
     await this.prismaService.filePost.create({ data: data });
-    console.log('created file post');
   }
 
   async likeFilePost(data: Prisma.FilePostLikeUncheckedCreateInput) {
