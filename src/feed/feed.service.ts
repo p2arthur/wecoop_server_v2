@@ -106,6 +106,14 @@ export class FeedService {
                 },
               },
               {
+                $lookup: {
+                  from: 'FilePostReply',
+                  localField: 'filepost_id',
+                  foreignField: 'filepost_id',
+                  as: 'replies',
+                },
+              },
+              {
                 $addFields: {
                   type: 'filepost',
                 },

@@ -15,4 +15,9 @@ export class FilePostController {
   async likeFilePost(@Body() data: Prisma.FilePostLikeUncheckedCreateInput) {
     this.filePostServices.likeFilePost(data);
   }
+
+  @Post('/reply')
+  async replyFilePost(@Body() data: Prisma.FilePostReplyCreateInput) {
+    this.filePostServices.replyFilePost(data);
+  }
 }

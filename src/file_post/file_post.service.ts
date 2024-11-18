@@ -20,4 +20,11 @@ export class FilePostService {
       console.error('error ', error);
     }
   }
+  async replyFilePost(data: Prisma.FilePostReplyCreateInput) {
+    try {
+      await this.prismaService.filePostReply.create({ data: data });
+    } catch (error) {
+      console.error('error ', error);
+    }
+  }
 }
