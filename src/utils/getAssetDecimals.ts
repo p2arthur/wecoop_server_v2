@@ -1,14 +1,14 @@
-import { AlgodClient } from 'algosdk/dist/types/client/v2/algod';
+import AlgodClient from 'algosdk/dist/types/client/v2/algod/algod';
 
 export const getAssetDecimals = async (algod: AlgodClient, assetId: number) => {
-try {
-  const { params } = await algod.getAssetByID(assetId).do()
+  try {
+    const { params } = await algod.getAssetByID(assetId).do();
 
-  const assetDecimals = params.decimals
+    const assetDecimals = params.decimals;
 
-  return assetDecimals
-} catch (error) {
-  console.error('Error to get asset decimals',error)
-  return error
-}
-}
+    return assetDecimals;
+  } catch (error) {
+    console.error('Error to get asset decimals', error);
+    return error;
+  }
+};

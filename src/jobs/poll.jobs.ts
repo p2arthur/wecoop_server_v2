@@ -108,8 +108,8 @@ export class PollExpiryJob {
       const amountSendTransaction = 1000; // Valor minimo
 
       const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        sender: sender,
-        receiver: receiver,
+        from: sender,
+        to: receiver,
         amount: amountSendTransaction,
         suggestedParams: await algodClient.getTransactionParams().do(),
         note: new Uint8Array(Buffer.from(note)),

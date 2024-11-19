@@ -91,8 +91,8 @@ async function placeOrder(
   const addr = process.env.WECOOP_CRUST_FACTORY_ADDRESS;
 
   const seed = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-    sender: addr,
-    receiver: (await appClient.appClient.getAppReference()).appAddress,
+    from: addr,
+    to: (await appClient.appClient.getAppReference()).appAddress,
     amount: price,
     suggestedParams: await algod.getTransactionParams().do(),
   });
