@@ -81,7 +81,7 @@ export class PollExpiryJob {
 
       if (existingNotification.length > 0) {
         console.log(
-          `Notificação já existe para o endereço ${voterAddress} na poll ${pollId}.`,
+          `Notificação jáa existe para o endereço ${voterAddress} na poll ${pollId}.`,
         );
         return;
       }
