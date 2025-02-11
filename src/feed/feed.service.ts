@@ -573,4 +573,168 @@ export class FeedService {
     this.postsList = uniquePostList;
     return this.postsList;
   }
+
+
+  public async getMongoPostsByWallet(
+    walletAddress: string,
+    page: number,
+    pageSize: number,
+  ): Promise<any> {
+    const skip = (page - 1) * pageSize;
+  
+    // Fetch paginated data for a specific wallet address
+    const dataPromise = this.prismaService.post.aggregateRaw({
+      pipeline: [
+        {
+          $match: {
+            creator_address: walletAddress,
+          },
+        },
+        {
+          $lookup: {
+            from: 'Reply',
+            localField: 'transaction_id',
+            foreignField: 'post_transaction_id',
+            as: 'replies',
+          },
+        },
+        {
+          $lookup: {
+            from: 'Like',
+            localField: 'transaction_id',
+            foreignField: 'post_transaction_id',
+            as: 'likes',
+          },
+        },
+        {
+          $addFields: {
+            type: 'post',
+          },
+        },
+        {
+          $unionWith: {
+            coll: 'Poll',
+            pipeline: [
+              {
+                $match: {
+                  creator_address: walletAddress,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'Voter',
+                  localField: 'pollId',
+                  foreignField: 'pollId',
+                  as: 'voters',
+                },
+              },
+              {
+                $addFields: {
+                  type: 'poll',
+                },
+              },
+            ],
+          },
+        },
+        {
+          $unionWith: {
+            coll: 'FilePost',
+            pipeline: [
+              {
+                $match: {
+                  creator_address: walletAddress,
+                },
+              },
+              {
+                $lookup: {
+                  from: 'FilePostLike',
+                  localField: 'filepost_id',
+                  foreignField: 'filepost_id',
+                  as: 'likes',
+                },
+              },
+              {
+                $lookup: {
+                  from: 'FilePostReply',
+                  localField: 'filepost_id',
+                  foreignField: 'filepost_id',
+                  as: 'replies',
+                },
+              },
+              {
+                $addFields: {
+                  type: 'filepost',
+                },
+              },
+            ],
+          },
+        },
+        {
+          $sort: {
+            timestamp: -1,
+          },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: pageSize,
+        },
+      ],
+    });
+  
+    // Get total count of posts for the given wallet address
+    const countPromise = this.prismaService.post.aggregateRaw({
+      pipeline: [
+        {
+          $match: {
+            creator_address: walletAddress,
+          },
+        },
+        {
+          $addFields: {
+            type: 'post',
+          },
+        },
+        {
+          $unionWith: {
+            coll: 'Poll',
+            pipeline: [
+              {
+                $match: {
+                  creator_address: walletAddress,
+                },
+              },
+              {
+                $addFields: {
+                  type: 'poll',
+                },
+              },
+            ],
+          },
+        },
+        {
+          $count: 'totalCount',
+        },
+      ],
+    });
+  
+    const [data, countResult] = await Promise.all([dataPromise, countPromise]);
+  
+    // Type assertion for total count
+    const totalCount =
+      (countResult[0] as { totalCount: number })?.totalCount || 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
+  
+    return {
+      data,
+      totalCount,
+      totalPages,
+      currentPage: page,
+    };
+  }
+  
 }
+
+
+
