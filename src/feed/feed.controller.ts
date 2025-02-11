@@ -66,4 +66,10 @@ export class FeedController {
     const result = await this.feedService.getAllPollsFromMongo(1, 620);
     return result;
   }
+
+  @Get('/by/mongodb/:walletAddress')
+  async getMongoPostsByAddress(@Param('walletAddress') walletAddress: string) {
+    const result = await this.feedService.getMongoPostsByWallet(walletAddress, 1 , 1000)
+    return result;
+  }
 }
